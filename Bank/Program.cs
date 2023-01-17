@@ -31,7 +31,6 @@
             {
                 int count = UserTextInput[i].Split(';').Length;
                 pandaGuldMynt[i] = new decimal[count];
-                Console.WriteLine("New account");
                 for (int j = 0; j < count; j++)
                 {
                     userInfo = UserTextInput[i].Split(';');

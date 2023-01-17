@@ -39,7 +39,7 @@ namespace Bank
                 }
             }
         }
-        // Allows user to change and set new menus - if needed
+        // Allows user to change and set new menus - if neededs
         public void SetMenu(string[] menu)
         {
             menuArr = menu;

@@ -72,10 +72,10 @@ namespace Bank
         public int UseMenu()
         {
             // Calls for a class that deals with user input
-            // Handles validation of input and only returns valid keyinput
+            // Handles validation of input and only returns valid keyinput// test- morgan
             InputHandler menuInput = new InputHandler(); 
 
-            bool usingMenu = true;
+            bool usingMenu = true; 
             do
             {
                 PrintSystem();

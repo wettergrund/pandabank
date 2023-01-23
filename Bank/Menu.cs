@@ -14,14 +14,13 @@ namespace Bank
     // A class that handles the creation of menus and allows the user to interact with them
     internal class Menu
     {
-        string[] menuArr = new string[3];
+        string[] menuArr = Array.Empty<string>();
         int selectedIndex = 0;
 
         // Takes an array of strings on class instantiation
         //And 
         public Menu(string[] items)
         {
-            menuArr = new string[items.Length];
             menuArr = items;
         }
 

@@ -53,7 +53,7 @@ namespace Bank
             {
                 // Also checks so that we are not already at currently selected index, also checks the first letter on each row for a match to user input 
                 // If found, stores the row value
-                if (input[i].Substring(0,1).ToUpper() == key.ToString().ToUpper() && i != position && i != num)
+                if (input[i].Substring(0,1).ToUpper() == key.ToString().ToUpper() && i != position)
                 {
                     num = i;
                     break;

@@ -1,4 +1,6 @@
-/.vs
-/Bank/bin
-/Bank/obj
+**/bin/*
+**/obj/*
+.vs/
+
+pandabank/.vs
 app.config

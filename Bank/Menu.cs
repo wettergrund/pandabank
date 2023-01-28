@@ -14,12 +14,11 @@ namespace Bank
     // A class that handles the creation of menus and allows the user to interact with them
     internal class Menu
     {
-        string[] menuArr = Array.Empty<string>();
-        int selectedIndex = 0;
+        protected string[] menuArr = Array.Empty<string>();
+        protected int selectedIndex = 0;
 
         // Takes an array of strings on class instantiation
-        //And 
-        public Menu(string[] items)
+        public void AddMenuItems(string[] items)
         {
             menuArr = items;
         }
@@ -38,10 +37,35 @@ namespace Bank
                 }
             }
         }
+
         // Allows user to change and set new menus - if needed
         public void SetMenu(string[] menu)
         {
             menuArr = menu;
+        }
+
+        // Gets account data for given user_id
+        // And creates a string to show accounts in the console
+        // Also returns string if needed
+        public string[] CreateAccountMenu(int userID)
+        {
+            List<BankAccountModel> currentUser = DataAccess.GetAccountData(userID);
+            string[] menuItems = new string[currentUser.Count + 1];
+
+            // Creates a menu array with the users accounts and adds an option to go back at the end
+            for (int i = 0; i < currentUser.Count + 1; i++)
+            {
+                if (i < currentUser.Count)
+                {
+                    menuItems[i] = currentUser.ElementAt(i).name;
+                }
+                else
+                {
+                    menuItems[i] = "Gå tillbaka";
+                }
+            }
+            SetMenu(menuItems);
+            return menuItems;
         }
 
         // A method that prints the menu when called
@@ -72,10 +96,8 @@ namespace Bank
         {
             // Calls for a class that deals with user input
             // Handles validation of input and only returns valid keyinput
-            InputHandler menuInput = new InputHandler(); 
-
-            bool usingMenu = true;
-            do
+            InputHandler menuInput = new InputHandler();
+            while(true)
             {
                 PrintSystem();
                 ConsoleKey userInput = menuInput.ReadInput(menuArr, selectedIndex); // Returns keyinput if valid
@@ -99,7 +121,7 @@ namespace Bank
                 }
                 Console.Clear(); // Clears the old menu
                 PrintSystem(); // Prints the newly updated menu
-            } while (usingMenu);
+            }
             return selectedIndex;
         }
     }

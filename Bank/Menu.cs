@@ -1,6 +1,8 @@
-﻿using System;
+﻿using DatabaseTesting;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
@@ -14,11 +16,15 @@ namespace Bank
     // A class that handles the creation of menus and allows the user to interact with them
     internal class Menu
     {
-        protected string[] menuArr = Array.Empty<string>();
-        protected int selectedIndex = 0;
+        string[] menuArr = Array.Empty<string>();
+        int selectedIndex = 0;
+        ConsoleColor color = ConsoleColor.DarkYellow;
+        string output = string.Empty;
 
         // Takes an array of strings on class instantiation
-        public void AddMenuItems(string[] items)
+        //And 
+        public Menu() { }
+        public Menu(string[] items)
         {
             menuArr = items;
         }
@@ -31,11 +37,17 @@ namespace Bank
             set
             {
                 // Checks if index is within bounds
-                if (value >= 0 && value < menuArr.Length) 
+                if (value >= 0 && value < menuArr.Length)
                 {
                     selectedIndex = value;
                 }
             }
+        }
+
+        public string Output
+        {
+            get { return output; }
+            set { output = value; }
         }
 
         // Allows user to change and set new menus - if needed
@@ -44,15 +56,44 @@ namespace Bank
             menuArr = menu;
         }
 
-        // Gets account data for given user_id
-        // And creates a string to show accounts in the console
-        // Also returns string if needed
-        public string[] CreateAccountMenu(int userID)
+        public ConsoleColor SetColor
+        {
+            get { return color; }
+            set { color = value; }
+        }
+
+        // A method that prints the menu when called
+        private void PrintSystem()
+        {
+            Console.Clear();
+            // Prints out the menu items in the console, and puts brackets around the selected item.
+            if(!String.IsNullOrWhiteSpace(output) )
+            {
+                Console.WriteLine(output);
+            }
+            for (int i = 0; i < menuArr.Length; i++)
+            {
+                // Checks if the current menu choice is the selected item 
+                // Makes the text green and puts brackets around it
+                if (i == selectedIndex)
+                {
+                    Console.ForegroundColor = color;
+                    Console.WriteLine("├ {0}", menuArr[i]);
+                }
+                else
+                {
+                    Console.ResetColor();
+                    Console.WriteLine("│ {0}", menuArr[i]);
+                }
+                Console.ResetColor();
+            }
+        }
+        // Creates a menu for the logged in user, and then sets it - Also able to return the menuArray
+        public string[] CreateMenu(int userID)
         {
             List<BankAccountModel> currentUser = DataAccess.GetAccountData(userID);
             string[] menuItems = new string[currentUser.Count + 1];
 
-            // Creates a menu array with the users accounts and adds an option to go back at the end
             for (int i = 0; i < currentUser.Count + 1; i++)
             {
                 if (i < currentUser.Count)
@@ -67,28 +108,51 @@ namespace Bank
             SetMenu(menuItems);
             return menuItems;
         }
-
-        // A method that prints the menu when called
-        private void PrintSystem()
+        // Creates a menuarray that shows the accounts name and balance - Then sets that as the current menu
+        public List<BankAccountModel> CreateTransferMenu(int userID, int selectedItem)
         {
-            Console.Clear();
-            // Prints out the menu items in the console, and puts brackets around the selected item.
-            for (int i = 0; i < menuArr.Length; i++)
+            if (selectedItem < 0)
             {
-                // Checks if the current menu choice is the selected item 
-                // Makes the text green and puts brackets around it
-                if (i == selectedIndex)
+                List<BankAccountModel> currentUser = DataAccess.GetAccountData(userID);
+                string[] menuItems = new string[currentUser.Count + 1];
+                for (int i = 0; i < currentUser.Count + 1; i++)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGreen;
-                    Console.WriteLine("[ {0} ]", menuArr[i]);
+                    if (i < currentUser.Count)
+                    {
+                        menuItems[i] = currentUser.ElementAt(i).name + ": " + currentUser.ElementAt(i).balance;
+                    }
+                    else
+                    {
+                        menuItems[i] = "Gå tillbaka";
+                    }
                 }
-                else
-                {
-                    Console.ResetColor();
-                    Console.WriteLine("  {0}  ", menuArr[i]);
-                }
-                Console.ResetColor();
+                SetMenu(menuItems);
+                return currentUser;
             }
+            else
+            {
+                List<BankAccountModel> currentUser = DataAccess.GetTransferAccountData(userID, selectedItem);
+                string[] menuItems = new string[currentUser.Count + 1];
+                int count = 0;
+                for (int i = 0; i < currentUser.Count + 1; i++)
+                {
+                    if (i < currentUser.Count)
+                    {
+                        menuItems[count++] = currentUser.ElementAt(i).name + ": " + currentUser.ElementAt(i).balance;
+                    }
+                    else
+                    {
+                        menuItems[count++] = "Gå tillbaka";
+                    }
+                }
+                SetMenu(menuItems);
+                return currentUser;
+            }
+        }
+        // Returns the menu array
+        public string[] GetMenu()
+        {
+            return menuArr;
         }
 
         // A method that allows the user to orientate around the menu
@@ -97,7 +161,9 @@ namespace Bank
             // Calls for a class that deals with user input
             // Handles validation of input and only returns valid keyinput
             InputHandler menuInput = new InputHandler();
-            while(true)
+
+            bool usingMenu = true;
+            do
             {
                 PrintSystem();
                 ConsoleKey userInput = menuInput.ReadInput(menuArr, selectedIndex); // Returns keyinput if valid
@@ -121,7 +187,7 @@ namespace Bank
                 }
                 Console.Clear(); // Clears the old menu
                 PrintSystem(); // Prints the newly updated menu
-            }
+            } while (usingMenu);
             return selectedIndex;
         }
     }

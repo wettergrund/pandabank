@@ -19,6 +19,7 @@ namespace Bank
         string[] menuArr = Array.Empty<string>();
         int selectedIndex = 0;
         ConsoleColor color = ConsoleColor.DarkYellow;
+        string output = string.Empty;
 
         // Takes an array of strings on class instantiation
         //And 
@@ -43,6 +44,12 @@ namespace Bank
             }
         }
 
+        public string Output
+        {
+            get { return output; }
+            set { output = value; }
+        }
+
         // Allows user to change and set new menus - if needed
         public void SetMenu(string[] menu)
         {
@@ -60,6 +67,10 @@ namespace Bank
         {
             Console.Clear();
             // Prints out the menu items in the console, and puts brackets around the selected item.
+            if(!String.IsNullOrWhiteSpace(output) )
+            {
+                Console.WriteLine(output);
+            }
             for (int i = 0; i < menuArr.Length; i++)
             {
                 // Checks if the current menu choice is the selected item 
@@ -67,12 +78,12 @@ namespace Bank
                 if (i == selectedIndex)
                 {
                     Console.ForegroundColor = color;
-                    Console.WriteLine("[ {0} ]", menuArr[i]);
+                    Console.WriteLine("├ {0}", menuArr[i]);
                 }
                 else
                 {
                     Console.ResetColor();
-                    Console.WriteLine("  {0}  ", menuArr[i]);
+                    Console.WriteLine("│ {0}", menuArr[i]);
                 }
                 Console.ResetColor();
             }
@@ -138,7 +149,7 @@ namespace Bank
                 return currentUser;
             }
         }
-
+        // Returns the menu array
         public string[] GetMenu()
         {
             return menuArr;

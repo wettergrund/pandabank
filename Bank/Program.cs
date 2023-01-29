@@ -44,6 +44,7 @@ namespace Bank
                         MoveMoney(Person.id);
                         break;
                     case 2:
+                        showMenu = false;
                         break;
                 }
             }
@@ -71,10 +72,9 @@ namespace Bank
         private static void MoveMoney(int userId = 2)
         {
             int selectedFromId = SelectAccount.FromID();
-            int selectedToId;
             if(selectedFromId > 0)
             {
-                selectedToId = SelectAccount.ToID(selectedFromId);
+                int selectedToId = SelectAccount.ToID(selectedFromId);
                 if(selectedToId> 0)
                 {
                     DataAccess.UpdateBalance(selectedFromId, selectedToId);

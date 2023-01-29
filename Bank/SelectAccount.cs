@@ -18,6 +18,7 @@ namespace Bank
             int selectedRow;
             while (true)
             {
+                fromAccountMenu.Output = "Från: ";
                 selectedRow = fromAccountMenu.UseMenu();
                 if (selectedRow == fromAccountMenu.GetMenu().Length - 1)
                 {
@@ -35,11 +36,12 @@ namespace Bank
         {
             /* Return DB ID of the selected account, will grey out already selected account  */
             Menu toAccountMenu = new Menu();
-            List<BankAccountModel> test = toAccountMenu.CreateTransferMenu(Person.id, selectedAccount);
+            List<BankAccountModel> options = toAccountMenu.CreateTransferMenu(Person.id, selectedAccount);
             int selected;
 
             while (true)
             {
+                toAccountMenu.Output = "Till: ";
                 selected = toAccountMenu.UseMenu();
                 if(selected == toAccountMenu.GetMenu().Length - 1)
                 {
@@ -47,7 +49,7 @@ namespace Bank
                 }
                 else
                 {
-                    return test[selected].id;
+                    return options[selected].id;
                 }
             }
             return -1;

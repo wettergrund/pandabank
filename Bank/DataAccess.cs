@@ -76,7 +76,7 @@ namespace Bank
                 cnn.Query<BankAccountModel>($"UPDATE bank_account SET balance = '{toBalance}' WHERE id='{toAccountID}'", new DynamicParameters());
             }
 
-            Console.WriteLine($"Nytt saldo: (från) '{fromBalance}' och  (till) '{toBalance}'");
+            Console.WriteLine($"Nytt saldo: (från) {fromBalance} och  (till) {toBalance}");
             Console.ReadKey();
         }
 

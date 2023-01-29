@@ -1,4 +1,5 @@
 ﻿using DatabaseTesting;
+using System.Globalization;
 
 namespace Bank
 {
@@ -6,6 +7,7 @@ namespace Bank
     {
         static void Main(string[] args)
         {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             ShowMenu();
         }
         // Shows a main menu to the user with options to login, or to exit the program

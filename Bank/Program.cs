@@ -8,7 +8,7 @@ namespace Bank
         {
             ShowMenu();
         }
-
+        // Shows a main menu to the user with options to login, or to exit the program
         private static void ShowMenu()
         {
             Menu MainMenu = new Menu(new string[] { "Logga in", "Stäng programmet" });
@@ -29,7 +29,8 @@ namespace Bank
                 }
             }
         }
-
+        // If user logs in succesfully - This will show different options that the user has
+        // Checking balance to their accounts, transfers between their own accounts and logging out.
         private static void ShowUserMenu()
         {
             Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Logga ut" });
@@ -39,6 +40,7 @@ namespace Bank
                 switch (UserMenu.UseMenu())
                 {
                     case 0:
+                        ShowAccountBalance(Person.id);
                         break;
                     case 1:
                         MoveMoney(Person.id);
@@ -49,7 +51,7 @@ namespace Bank
                 }
             }
         }
-
+        // A basic login prototype with no error handling :D
         private static bool Login()
         {
             Console.Write("Förnamn: ");
@@ -68,7 +70,14 @@ namespace Bank
                 return false;
             }
         }
-
+        // Calls the method to create a menu to show account balances
+        public static void ShowAccountBalance(int userID)
+        {
+            Menu BalanceMenu = new Menu();
+            BalanceMenu.CreateTransferMenu(userID, -1);
+            BalanceMenu.UseMenu();
+        }
+        // Method that allows user to send money between their own accounts
         private static void MoveMoney(int userId = 2)
         {
             int selectedFromId = SelectAccount.FromID();

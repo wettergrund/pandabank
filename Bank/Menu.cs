@@ -88,7 +88,7 @@ namespace Bank
                 Console.ResetColor();
             }
         }
-
+        // Creates a menu for the logged in user, and then sets it - Also able to return the menuArray
         public string[] CreateMenu(int userID)
         {
             List<BankAccountModel> currentUser = DataAccess.GetAccountData(userID);
@@ -108,7 +108,7 @@ namespace Bank
             SetMenu(menuItems);
             return menuItems;
         }
-
+        // Creates a menuarray that shows the accounts name and balance - Then sets that as the current menu
         public List<BankAccountModel> CreateTransferMenu(int userID, int selectedItem)
         {
             if (selectedItem < 0)

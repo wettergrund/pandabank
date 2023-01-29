@@ -71,10 +71,15 @@ namespace Bank
         private static void MoveMoney(int userId = 2)
         {
             int selectedFromId = SelectAccount.FromID();
-            int selectedToId = SelectAccount.ToID(selectedFromId);
-
-            DataAccess.UpdateBalance(selectedFromId, selectedToId);
-
+            int selectedToId;
+            if(selectedFromId > 0)
+            {
+                selectedToId = SelectAccount.ToID(selectedFromId);
+                if(selectedToId> 0)
+                {
+                    DataAccess.UpdateBalance(selectedFromId, selectedToId);
+                }
+            }
         }
     }
 }

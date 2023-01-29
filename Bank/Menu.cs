@@ -139,9 +139,9 @@ namespace Bank
             }
         }
 
-        public string GetSelectedMenuItem()
+        public string[] GetMenu()
         {
-            return menuArr[selectedIndex];
+            return menuArr;
         }
 
         // A method that allows the user to orientate around the menu

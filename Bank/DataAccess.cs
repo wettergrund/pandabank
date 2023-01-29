@@ -39,12 +39,33 @@ namespace Bank
             }
         }
 
-        public static void UpdateBalance(int fromAccountID, int toAccountID, decimal amount = 0)
+        public static void UpdateBalance(int fromAccountID, int toAccountID)
         {
             /* Method that move money from one account to another account, based on accounts DB ID */
+            decimal amount;
+            bool successfulInput;
 
-            Console.WriteLine("Ange en summa");
-            amount = Convert.ToDecimal(Console.ReadLine());
+            do {
+                Console.Clear();
+                Console.WriteLine("Ange en summa");
+                string? enteredValue = Console.ReadLine();
+
+                enteredValue = enteredValue.Replace(",", ".");
+                var countPennies = enteredValue.Split('.');
+
+
+                successfulInput = decimal.TryParse(enteredValue, out amount);
+
+                if (countPennies.Length > 1 && countPennies[1].Length > 2)
+                {
+                    Console.WriteLine("Du kan max ange 99 ören");
+                    Console.ReadLine();
+
+                    successfulInput = false;
+                }
+            }
+            while (!successfulInput);
+
 
             decimal fromBalance;
             decimal toBalance;

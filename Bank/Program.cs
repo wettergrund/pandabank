@@ -20,7 +20,7 @@ namespace Bank
                 switch (MainMenu.UseMenu())
                 {
                     case 0:
-                        if(Login())
+                        if (Login.LoginChecker())
                         {
                             ShowUserMenu();
                         }
@@ -53,25 +53,7 @@ namespace Bank
                 }
             }
         }
-        // A basic login prototype with no error handling :D
-        private static bool Login()
-        {
-            Console.Write("Förnamn: ");
-            Person.FirstName = Console.ReadLine();
-            Console.Write("Lösenord: ");
-            Person.PinCode = Console.ReadLine();
-            Person.id = DataAccess.GetUserID(Person.FirstName, Person.PinCode);
 
-            if (Person.id > 0)
-            {
-                Console.WriteLine("Du har loggats in.");
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
         // Calls the method to create a menu to show account balances
         public static void ShowAccountBalance(int userID)
         {

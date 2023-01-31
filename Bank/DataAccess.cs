@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,12 +30,33 @@ namespace Bank
                 return output.ToList();
             }
         }
-
-        public static int GetUserID(string firstName, string pinCode)
+        // Checks if the users exists in the database
+        public static bool CheckUserExists(string username, string pin)
+        {
+            using (NpgsqlConnection cnn = new NpgsqlConnection(LoadConnectionString())) 
+            {
+                cnn.Open();
+                var sql = $"SELECT COUNT(*) FROM bank_user WHERE user_name = '{username}' AND pin_code = '{pin}'";
+                var cmd = new NpgsqlCommand(sql, cnn);
+                cmd.Parameters.AddWithValue("user_name", username);
+                bool userExists = (Int64)cmd.ExecuteScalar() > 0;
+                if(userExists)
+                {
+                    cnn.Close();
+                    return true;
+                }
+                else
+                {
+                    cnn.Close();
+                    return false;
+                }
+            }
+        }
+        public static int GetUserID(string userName, string pinCode)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankUserModel>($"SELECT id FROM bank_user WHERE first_name = '{firstName}' AND pin_code = '{pinCode}'", new DynamicParameters());
+                var output = cnn.Query<BankUserModel>($"SELECT id FROM bank_user WHERE user_name = '{userName}' AND pin_code = '{pinCode}'", new DynamicParameters());
                 return output.ElementAt(0).id;
             }
         }

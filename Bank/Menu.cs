@@ -67,7 +67,7 @@ namespace Bank
         {
             Console.Clear();
             // Prints out the menu items in the console, and puts brackets around the selected item.
-            if(!String.IsNullOrWhiteSpace(output) )
+            if (!String.IsNullOrWhiteSpace(output) )
             {
                 Console.WriteLine(output);
             }
@@ -185,7 +185,6 @@ namespace Bank
                 {
                     SelectIndex = menuInput.GetIndex();
                 }
-                Console.Clear(); // Clears the old menu
                 PrintSystem(); // Prints the newly updated menu
             } while (usingMenu);
             return selectedIndex;

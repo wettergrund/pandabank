@@ -21,6 +21,24 @@ namespace Bank
                 return output.ToList();
             }
         }
+
+        public static List<BankUserModel> GetUserData(int user_id)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankUserModel>($"SELECT * FROM bank_user WHERE id = '{user_id}'", new DynamicParameters());
+                return output.ToList();
+            }
+        }
+        public static List<BankUserModel> CheckAccess(int user_id)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankUserModel>($"SELECT * FROM bank_user u INNER JOIN bank_role r ON u.role_id = r.id WHERE u.id = '{user_id}'", new DynamicParameters());
+                return output.ToList();
+            }
+        }
+
         public static List<BankAccountModel> GetTransferAccountData(int user_id, int accountID)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
@@ -38,6 +56,15 @@ namespace Bank
                 return output.ElementAt(0).id;
             }
         }
+        public static void CreateUser(BankUserModel user)
+        {
+            //ResetIndex();
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Query<BankUserModel>($"INSERT INTO bank_user (first_name, last_name, pin_code, role_id, branch_id) VALUES ('{user.first_name}','{user.last_name}','{user.pin_code}','{user.role_id}','{user.branch_id}')", new DynamicParameters());
+            }
+        }
+
 
         public static void UpdateBalance(int fromAccountID, int toAccountID)
         {

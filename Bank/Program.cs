@@ -1,5 +1,6 @@
 ﻿using DatabaseTesting;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Bank
 {
@@ -35,7 +36,7 @@ namespace Bank
         // Checking balance to their accounts, transfers between their own accounts and logging out.
         private static void ShowUserMenu()
         {
-            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Logga ut" });
+            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton","Skapa ett nytt konto","Ta bort ett konto", "Logga ut" });
             bool showMenu = true;
             while (showMenu)
             {
@@ -48,6 +49,12 @@ namespace Bank
                         MoveMoney(Person.id);
                         break;
                     case 2:
+                        CreatNewAcc();
+                        break;
+                    case 3:
+                        DeleteAcc(Person.id);
+                        break;
+                    case 4:
                         showMenu = false;
                         break;
                 }
@@ -91,6 +98,52 @@ namespace Bank
                     DataAccess.UpdateBalance(selectedFromId, selectedToId);
                 }
             }
+        }
+        //Method to creat a savings account
+        public static void CreatNewAcc()
+        {
+            BankAccountModel newAcc = new BankAccountModel();
+            Console.Write("Kontonamn: ");
+            string accName = Console.ReadLine();
+            if (Regex.IsMatch(accName, @"^[a-zA-Z0-9_]+$"))
+            {
+                newAcc.name = accName;
+            }
+            else
+            {
+                Console.WriteLine("Du kan bara skapa konton med bokstäver");
+                Console.ReadKey();
+            }
+
+            Console.WriteLine("Hur mycket pengar vill du sätta in?");
+            Console.Write(accName + ": ");
+            bool success = decimal.TryParse(Console.ReadLine(), out decimal accValue);
+            if (success)
+            {
+                newAcc.balance = accValue;
+            }
+            else
+            {
+                Console.WriteLine("Var god och skriv in ett nummer");
+                Console.ReadKey();
+            }
+
+            Console.WriteLine(newAcc.name + newAcc.balance);
+            Console.ReadKey();
+            DataAccess.CreateUserAcc(newAcc);
+
+        }
+
+        public static void DeleteAcc(int userID)
+        {
+            
+            Menu accountMenu = new Menu();
+            accountMenu.CreateMenu(userID);
+            int selectedIndex = accountMenu.UseMenu();
+            Console.WriteLine(selectedIndex);
+            DataAccess.DeleteUserAcc(selectedIndex);
+            Console.ReadLine();
+            
         }
     }
 }

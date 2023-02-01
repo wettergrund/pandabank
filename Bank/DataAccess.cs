@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using DatabaseTesting;
 using Npgsql;
 using System;
 using System.Collections.Generic;
@@ -100,8 +101,23 @@ namespace Bank
             Console.WriteLine($"Nytt saldo: (från) {fromBalance} och  (till) {toBalance}");
             Console.ReadKey();
         }
+        public static void CreateUserAcc(BankAccountModel Account)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{Person.id}',1, @balance )", Account);
+            }
+        }
 
-        private static string LoadConnectionString(string id = "Default")
+        public static void DeleteUserAcc(int delAccount)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"DELETE FROM bank_account WHERE id='{delAccount}'");
+            }
+        }
+
+        private static string LoadConnectionString(string id = "myDB")
         {
             return ConfigurationManager.ConnectionStrings[id].ConnectionString;
         }

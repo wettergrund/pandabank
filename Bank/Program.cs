@@ -7,6 +7,7 @@ namespace Bank
     {
         static void Main(string[] args)
         {
+            
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             ShowMenu();
         }
@@ -35,10 +36,29 @@ namespace Bank
         // Checking balance to their accounts, transfers between their own accounts and logging out.
         private static void ShowUserMenu()
         {
-            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Logga ut" });
+            List<BankUserModel> getPermission = DataAccess.CheckAccess(Person.id);
+            bool isAdmin = getPermission[0].is_admin;
+
+            var loggedOnUser = DataAccess.GetUserData(Person.id).FirstOrDefault();
+
+            Console.WriteLine($"{loggedOnUser.full_name}");
+            Console.ReadLine();
+            
+
             bool showMenu = true;
             while (showMenu)
             {
+                Menu UserMenu;
+
+                if (isAdmin)
+                {
+                    UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Logga ut", " ","ADMIN" });
+                }
+                else
+                {
+                    UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Logga ut" });
+
+                }
                 switch (UserMenu.UseMenu())
                 {
                     case 0:
@@ -50,8 +70,14 @@ namespace Bank
                     case 2:
                         showMenu = false;
                         break;
+                    case 4:
+                        AdminMenu();
+                        break;
                 }
+                                    
             }
+
+
         }
         // A basic login prototype with no error handling :D
         private static bool Login()
@@ -91,6 +117,43 @@ namespace Bank
                     DataAccess.UpdateBalance(selectedFromId, selectedToId);
                 }
             }
+        }
+
+        static void AdminMenu()
+        {
+            Menu CreateAcoountMenu = new Menu(new string[] { "Skapa användare", "Gå tillbaka" });
+            bool showMenu = true;
+            while (showMenu) { 
+
+                switch (CreateAcoountMenu.UseMenu())
+                {
+                    case 0:
+                        BankUserModel newUser = new BankUserModel();
+
+                       
+                        Console.Write("Ange förnamn: ");
+                        newUser.first_name = Console.ReadLine();
+                        Console.Write("Ange efternamn: ");
+                        newUser.last_name = Console.ReadLine();
+
+                        Random random = new Random();
+                        newUser.pin_code = Convert.ToString(random.Next(1000, 9999));
+
+                        Console.WriteLine($"Skapa {newUser.full_name} med pinkod {newUser.pin_code}");
+                        Console.ReadLine();
+                        DataAccess.CreateUser(newUser);
+
+
+                        break;
+                    case 1:
+                        Console.WriteLine("Gå tillbaka");
+                        showMenu = false;
+                        break;
+                    case 2:
+                        break;
+                }
+            }
+
         }
     }
 }

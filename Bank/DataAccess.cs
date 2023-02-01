@@ -95,37 +95,55 @@ namespace Bank
             while (!successfulInput);
 
 
-            decimal fromBalance;
-            decimal toBalance;
+            //decimal fromBalance;
+            //decimal toBalance;
+
+            //using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            //{
+            //    var output = cnn.Query<BankAccountModel>($"SELECT balance FROM bank_account WHERE id = '{fromAccountID}' ORDER BY name ASC, balance ASC", new DynamicParameters());
+            //    List<BankAccountModel> tempList = output.ToList();
+            //    fromBalance = Convert.ToDecimal(tempList[0].balance);
+
+            //    output = cnn.Query<BankAccountModel>($"SELECT balance FROM bank_account WHERE id = '{toAccountID}' ORDER BY name ASC, balance ASC", new DynamicParameters());
+            //    tempList = output.ToList();
+            //    toBalance = Convert.ToDecimal(tempList[0].balance);
+            //}
+
+            //fromBalance -= amount;
+            //toBalance += amount;
+
+            //if (fromBalance < 0)
+            //{
+            //    Console.WriteLine("Inte tillräckligt med pengar");
+            //    Console.ReadKey();
+            //    return;
+            //}
 
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankAccountModel>($"SELECT balance FROM bank_account WHERE id = '{fromAccountID}' ORDER BY name ASC, balance ASC", new DynamicParameters());
-                List<BankAccountModel> tempList = output.ToList();
-                fromBalance = Convert.ToDecimal(tempList[0].balance);
+                try { 
+                cnn.Query(@$"
+                BEGIN TRANSACTION;
+                UPDATE bank_account SET balance = CASE
+                    WHEN id='{fromAccountID}' AND balance >= '{amount}' THEN balance - '{amount}'
+                    WHEN id='{toAccountID}' THEN balance + '{amount}'
+                END
+                WHERE id IN('{fromAccountID}','{toAccountID}');
+    
+                    COMMIT;
 
-                output = cnn.Query<BankAccountModel>($"SELECT balance FROM bank_account WHERE id = '{toAccountID}' ORDER BY name ASC, balance ASC", new DynamicParameters());
-                tempList = output.ToList();
-                toBalance = Convert.ToDecimal(tempList[0].balance);
+                ", new DynamicParameters());
+                
+                }
+                catch
+                {
+                    Console.WriteLine("Något gick fel, kontrollera att du har täckning på kontot");
+                    Console.ReadLine();
+                }
             }
+            Console.WriteLine("Pengar överförda");
 
-            fromBalance -= amount;
-            toBalance += amount;
 
-            if (fromBalance < 0)
-            {
-                Console.WriteLine("Inte tillräckligt med pengar");
-                Console.ReadKey();
-                return;
-            }
-
-            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
-            {
-                cnn.Query<BankAccountModel>($"UPDATE bank_account SET balance = '{fromBalance}' WHERE id= '{fromAccountID}'", new DynamicParameters());
-                cnn.Query<BankAccountModel>($"UPDATE bank_account SET balance = '{toBalance}' WHERE id='{toAccountID}'", new DynamicParameters());
-            }
-
-            Console.WriteLine($"Nytt saldo: (från) {fromBalance} och  (till) {toBalance}");
             Console.ReadKey();
         }
 

@@ -41,8 +41,7 @@ namespace Bank
 
             var loggedOnUser = DataAccess.GetUserData(Person.id).FirstOrDefault();
 
-            Console.WriteLine($"{loggedOnUser.full_name}");
-            Console.ReadLine();
+            
             
 
             bool showMenu = true;
@@ -128,6 +127,7 @@ namespace Bank
                 switch (CreateAcoountMenu.UseMenu())
                 {
                     case 0:
+                        // Get model of new user
                         BankUserModel newUser = new BankUserModel();
 
                        
@@ -135,13 +135,21 @@ namespace Bank
                         newUser.first_name = Console.ReadLine();
                         Console.Write("Ange efternamn: ");
                         newUser.last_name = Console.ReadLine();
+                        Console.Write("Ange branch(1-2): ");
+                        newUser.branch_id = int.Parse(Console.ReadLine());
 
+                        //Generate pin for user
                         Random random = new Random();
                         newUser.pin_code = Convert.ToString(random.Next(1000, 9999));
 
-                        Console.WriteLine($"Skapa {newUser.full_name} med pinkod {newUser.pin_code}");
-                        Console.ReadLine();
                         DataAccess.CreateUser(newUser);
+                        Console.WriteLine(
+                            @$"Användare har skapats
+Namn: {newUser.first_name} {newUser.last_name}
+Pinkod: {newUser.pin_code} ");
+
+                        
+                        Console.ReadLine();
 
 
                         break;

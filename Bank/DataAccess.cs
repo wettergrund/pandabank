@@ -31,15 +31,15 @@ namespace Bank
             }
         }
         // Checks if the users exists in the database
-        public static bool CheckUserExists(string username, string pin)
+        public static bool CheckUserExists(string email)
         {
             using (NpgsqlConnection cnn = new NpgsqlConnection(LoadConnectionString())) 
             {
                 cnn.Open();
-                var sql = $"SELECT COUNT(*) FROM bank_user WHERE user_name = '{username}' AND pin_code = '{pin}'";
+                var sql = $"SELECT COUNT(*) FROM bank_user WHERE email = '{email}'";
                 var cmd = new NpgsqlCommand(sql, cnn);
-                cmd.Parameters.AddWithValue("user_name", username);
-                bool userExists = (Int64)cmd.ExecuteScalar() > 0;
+                cmd.Parameters.AddWithValue("email", email);
+                bool userExists = (long)cmd.ExecuteScalar() > 0;
                 if(userExists)
                 {
                     cnn.Close();
@@ -52,11 +52,33 @@ namespace Bank
                 }
             }
         }
-        public static int GetUserID(string userName, string pinCode)
+
+        public static bool CheckUserInfo(string email, string pin)
+        {
+            using (NpgsqlConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Open();
+                var sql = $"SELECT COUNT(*) FROM bank_user WHERE email = '{email}' AND pin_code = '{pin}'";
+                var cmd = new NpgsqlCommand(sql, cnn);
+                cmd.Parameters.AddWithValue("email", email);
+                bool userExists = (long)cmd.ExecuteScalar() > 0;
+                if (userExists)
+                {
+                    cnn.Close();
+                    return true;
+                }
+                else
+                {
+                    cnn.Close();
+                    return false;
+                }
+            }
+        }
+        public static int GetUserID(string email, string pinCode)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankUserModel>($"SELECT id FROM bank_user WHERE user_name = '{userName}' AND pin_code = '{pinCode}'", new DynamicParameters());
+                var output = cnn.Query<BankUserModel>($"SELECT id FROM bank_user WHERE email = '{email}' AND pin_code = '{pinCode}'", new DynamicParameters());
                 return output.ElementAt(0).id;
             }
         }
@@ -78,10 +100,16 @@ namespace Bank
 
                 successfulInput = decimal.TryParse(enteredValue, out amount);
 
+                if(amount < 0)
+                {
+                    Console.WriteLine("Negativa summor funkar ej.");
+                    Console.ReadKey();
+                    successfulInput = false;
+                }
                 if (countPennies.Length > 1 && countPennies[1].Length > 2)
                 {
                     Console.WriteLine("Du kan max ange 99 ören");
-                    Console.ReadLine();
+                    Console.ReadKey();
 
                     successfulInput = false;
                 }
@@ -127,5 +155,6 @@ namespace Bank
         {
             return ConfigurationManager.ConnectionStrings[id].ConnectionString;
         }
+
     }
 }

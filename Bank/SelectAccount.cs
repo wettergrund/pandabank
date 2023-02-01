@@ -14,7 +14,7 @@ namespace Bank
 
             /* Return DB ID of the selected account.  */
             Menu fromAccountMenu = new Menu();
-            List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu(Person.id, -1);
+            List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu(Person.id);
             int selectedRow;
             while (true)
             {

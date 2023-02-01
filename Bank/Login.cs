@@ -8,72 +8,110 @@ using System.Threading.Tasks;
 
 namespace Bank
 {
-    public static class Login
+    public class Login
     {
-        public static bool LoginChecker()
+        private static string[] menuArray = new string[] { "Email:", "Pinkod:", "Gå tillbaka" };
+        readonly Menu LoginMenu = new Menu(menuArray);
+        private string menuItem = "";
+        public bool LoginChecker()
         {
-            bool nameCheck = true;
-            bool passwordCheck = true;
-            bool showLogin = true;
-            while(showLogin)
+            ResetLoginData();
+            bool login = true;
+            while(login)
             {
-                while (nameCheck)
+                switch (LoginMenu.UseMenu())
                 {
-                    Console.Clear();
-                    Console.Write("Användarnamn: ");
-                    nameCheck = CheckUserName(Console.ReadLine());
-                }
-                while (passwordCheck)
-                {
-                    Console.Clear();
-                    Console.WriteLine("Användarnamn: {0}", Person.UserName);
-                    Console.Write("Pinkod: ");
-                    passwordCheck = CheckPassword(Console.ReadLine());
-                }
-                // Checks if the user exists in the database
-                if (!DataAccess.CheckUserExists(Person.UserName, Person.PinCode))
-                {
-                    Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
-                    Console.ReadKey();
-                    nameCheck = true;
-                    passwordCheck = true;
-                }
-                else
-                {
-                    Person.id = DataAccess.GetUserID(Person.UserName, Person.PinCode);
-                    showLogin = false;
-                }
+                    case 0:
+                        ResetLoginData();
+                        InputEmail();
+                        break;
+                    case 1:
+                        login = InputPincode();
+                        break;
+                    case 2:
+                        return false;
+                } 
             }
             return true;
         }
-
-        // Checks if username only has allowed characters (Alphabetic letters, numbers and underscore)
-        private static bool CheckUserName(string username)
+        private void ResetLoginData()
         {
-            if(Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
+            Person.Email = "";
+            Person.PinCode = "";
+            LoginMenu.SetMenuItem("Email:", 0);
+            LoginMenu.SelectIndex = 0;
+            LoginMenu.PrintSystem();
+        }
+        private void InputEmail()
+        {
+            bool isEmail = true;
+            while (isEmail)
             {
-                Person.UserName = FormatUserName(username);
+                LoginMenu.MoveCursorRight();
+                isEmail = CheckEmail(Console.ReadLine());
+                LoginMenu.SetMenuItem("Email:" + menuItem, 0);
+            }
+        }
+
+        private bool InputPincode()
+        {
+            bool pinCheck = true;
+            while (pinCheck)
+            {
+                LoginMenu.MoveCursorRight();
+                pinCheck = CheckPincode(Console.ReadLine());
+                LoginMenu.MoveCursorBottom();
+            }
+
+            if (string.IsNullOrWhiteSpace(Person.Email) || !DataAccess.CheckUserInfo(Person.Email, Person.PinCode))
+            {
+                Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
+                Console.ReadKey();
+            }
+            else
+            {
+                Person.id = DataAccess.GetUserID(Person.Email, Person.PinCode);
                 return false;
             }
-            Console.WriteLine("Fel användarnamn. Försök igen.");
             return true;
         }
 
-        // Formats the username and sets the first letter in uppercase, rest to lowercase
-        private static string FormatUserName(string username)
+        //Moves the cursor to the bottom, prints the given error/warning message to the user
+        //Then moves the cursor back
+        private void Warning(string menuItem, string message)
         {
-            return username.Substring(0, 1).ToUpper() + username.Substring(1).ToLower(); ;
+            LoginMenu.MoveCursorBottom();
+            Console.WriteLine(message);
+            LoginMenu.SetMenuItem(menuItem, LoginMenu.SelectIndex);
+            Console.ReadKey(true);
+            LoginMenu.MoveCursorTop();
+            LoginMenu.PrintSystem();
         }
+
+        // Checks if email only has allowed characters (Alphabetic letters, numbers and underscore)
+        private bool CheckEmail(string email)
+        {
+            if(Regex.IsMatch(email, @"^[a-zA-Z0-9_@.]+$"))
+            {
+                Person.Email = Helper.FormatString(email);
+                menuItem = Person.Email;
+                return false;
+            }
+            ResetLoginData();
+            Warning("Email:", "Fel användarnamn eller lösenord. Försök igen.");
+            return true;
+        }
+
         //Checks if password only contains integers
-        private static bool CheckPassword(string password)
+        private bool CheckPincode(string pincode)
         {
-            bool success = int.TryParse(password, out int result);
-            if(success)
+            bool success = int.TryParse(pincode, out int result);
+            if(success && pincode.Length <= 4)
             {
-                Person.PinCode = password;
+                Person.PinCode = result.ToString();
                 return false;
             }
-            Console.WriteLine("Endast nummer är tillåtna. Försök igen.");
+            Warning("Pinkod:", "Endast nummer är tillåtna. Försök igen.");
             return true;
         }
     }

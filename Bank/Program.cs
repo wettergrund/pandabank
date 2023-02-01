@@ -14,13 +14,14 @@ namespace Bank
         private static void ShowMenu()
         {
             Menu MainMenu = new Menu(new string[] { "Logga in", "Stäng programmet" });
+            Login login = new Login();
             bool showMenu = true;
             while(showMenu)
             {
                 switch (MainMenu.UseMenu())
                 {
                     case 0:
-                        if (Login.LoginChecker())
+                        if (login.LoginChecker())
                         {
                             ShowUserMenu();
                         }
@@ -58,7 +59,7 @@ namespace Bank
         public static void ShowAccountBalance(int userID)
         {
             Menu BalanceMenu = new Menu();
-            BalanceMenu.CreateTransferMenu(userID, -1);
+            BalanceMenu.CreateTransferMenu(userID);
             BalanceMenu.UseMenu();
         }
         // Method that allows user to send money between their own accounts

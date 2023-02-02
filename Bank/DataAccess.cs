@@ -84,6 +84,17 @@ namespace Bank
                 }
             }
         }
+        public static void CreateUser(BankUserModel user)
+        {
+            //ResetIndex();
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Query($"INSERT INTO bank_user (first_name, last_name, pin_code, role_id, branch_id) VALUES ('{user.first_name}','{user.last_name}','{user.pin_code}','{user.role_id}','{user.branch_id}')", new DynamicParameters());
+
+            }
+        }
+
+
         public static int GetUserID(string email, string pinCode)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))

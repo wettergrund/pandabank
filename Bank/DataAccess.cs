@@ -22,6 +22,15 @@ namespace Bank
                 return output.ToList();
             }
         }
+        public static List<BankUserModel> GetUserData(int user_id)
+        {
+            using(IDbConnection cnn =new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, pin_code , role_id , branch_id FROM bank_user WHERE id = '{user_id}'", new DynamicParameters());
+                return output.ToList();
+
+            }
+        }
         public static List<BankAccountModel> GetTransferAccountData(int user_id, int accountID)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))

@@ -9,8 +9,7 @@ namespace Bank
         static void Main(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-            AdminMenu();
-            //ShowMenu();
+            ShowMenu();
         }
         // Shows a main menu to the user with options to login, or to exit the program
         private static void ShowMenu()

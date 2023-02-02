@@ -196,26 +196,32 @@ namespace Bank
                     case 0:
                         // Get model of new user
                         BankUserModel newUser = new BankUserModel();
+                        Regex regex = new Regex(@"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$",
+                                    RegexOptions.CultureInvariant | RegexOptions.Singleline);
+                        bool isValidEmail = false;
+                        do
+                        {
+                            Console.Clear();
+                            Console.CursorTop = 0;
+                            Console.Write($"Ange förnamn: {newUser.first_name}");
+                            newUser.first_name = Console.ReadLine();
+                            Console.Write($"Ange efternamn: {newUser.last_name}");
+                            newUser.last_name = Console.ReadLine();
+                                                       
+                            Console.Write($"Ange mail: ");
+                            newUser.email = Console.ReadLine();
+                            isValidEmail = regex.IsMatch(newUser.email);
+                        }
+                        while (!isValidEmail);
 
-
-                        Console.Write("Ange förnamn: ");
-                        newUser.first_name = Console.ReadLine();
-                        Console.Write("Ange efternamn: ");
-                        newUser.last_name = Console.ReadLine();
-                        Console.Write("Ange mail: ");
-                        newUser.email = Console.ReadLine();
-                        Console.Write("Ange branch(1-2): ");
-                        newUser.branch_id = int.Parse(Console.ReadLine());
+                        newUser.branch_id = 3;
 
                         //Generate pin for user
                         Random random = new Random();
                         newUser.pin_code = Convert.ToString(random.Next(1000, 9999));
 
                         DataAccess.CreateUser(newUser);
-                        Console.WriteLine(
-                            @$"Användare har skapats
-                            Namn: {newUser.first_name} {newUser.last_name}
-                            Pinkod: {newUser.pin_code} ");
+                        Console.WriteLine($"\nAnvändare har skapats\nMail: {newUser.email}\nNamn: {newUser.first_name} {newUser.last_name}\nPinkod: {newUser.pin_code} ");
 
 
                         Console.ReadLine();

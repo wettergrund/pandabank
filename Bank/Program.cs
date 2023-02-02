@@ -71,7 +71,7 @@ namespace Bank
             BalanceMenu.UseMenu();
         }
         // Method that allows user to send money between their own accounts
-        private static void MoveMoney(int userId = 2)
+        private static void MoveMoney()
         {
             int selectedFromId = SelectAccount.FromID();
             if(selectedFromId > 0)
@@ -203,14 +203,14 @@ namespace Bank
                         {
                             Console.Clear();
                             Console.CursorTop = 0;
-                            Console.Write($"Ange förnamn: {newUser.first_name}");
+                            Console.Write($"Ange förnamn: ");
                             newUser.first_name = Console.ReadLine();
-                            Console.Write($"Ange efternamn: {newUser.last_name}");
+                            Console.Write($"Ange efternamn: ");
                             newUser.last_name = Console.ReadLine();
 
                             // Error handling for incorrect name.
-                            bool validName = newUser.first_name.Length > 0 && newUser.last_name.Length > 0 ? true : false;
-                            if (!validName)
+                            bool isValidName = newUser.first_name.Length > 0 && newUser.last_name.Length > 0 ? true : false;
+                            if (!isValidName)
                             {
                                 Console.WriteLine($"Du måste ange både för och efternamn!");
                                 Console.ReadLine();

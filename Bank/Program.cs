@@ -207,10 +207,26 @@ namespace Bank
                             newUser.first_name = Console.ReadLine();
                             Console.Write($"Ange efternamn: {newUser.last_name}");
                             newUser.last_name = Console.ReadLine();
-                                                       
+
+                            // Error handling for incorrect name.
+                            bool validName = newUser.first_name.Length > 0 && newUser.last_name.Length > 0 ? true : false;
+                            if (!validName)
+                            {
+                                Console.WriteLine($"Du måste ange både för och efternamn!");
+                                Console.ReadLine();
+                                continue;
+                            }
+
                             Console.Write($"Ange mail: ");
                             newUser.email = Console.ReadLine();
+                            
+                            // Error handling for incorrect email.
                             isValidEmail = regex.IsMatch(newUser.email);
+                            if (!isValidEmail)
+                            {
+                                Console.WriteLine($"Mailadressen du angett ({newUser.email}) är felaktig. Var god försök igen.");
+                                Console.ReadLine();
+                            }
                         }
                         while (!isValidEmail);
 

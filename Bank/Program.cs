@@ -39,11 +39,6 @@ namespace Bank
             List<BankUserModel> getPermission = DataAccess.CheckAccess(Person.id);
             bool isAdmin = getPermission[0].is_admin;
 
-            var loggedOnUser = DataAccess.GetUserData(Person.id).FirstOrDefault();
-
-            
-            
-
             bool showMenu = true;
             while (showMenu)
             {

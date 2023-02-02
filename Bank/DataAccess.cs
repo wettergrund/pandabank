@@ -126,7 +126,7 @@ namespace Bank
             }
         }
 
-        private static string LoadConnectionString(string id = "myDB")
+        private static string LoadConnectionString(string id = "Default")
         {
             return ConfigurationManager.ConnectionStrings[id].ConnectionString;
         }

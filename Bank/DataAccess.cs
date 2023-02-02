@@ -89,9 +89,18 @@ namespace Bank
             //ResetIndex();
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                cnn.Query($"INSERT INTO bank_user (first_name, last_name, pin_code, role_id, branch_id) VALUES ('{user.first_name}','{user.last_name}','{user.pin_code}','{user.role_id}','{user.branch_id}')", new DynamicParameters());
+                cnn.Query($"INSERT INTO bank_user (first_name, last_name, pin_code, role_id, branch_id, email) VALUES ('{user.first_name}','{user.last_name}','{user.pin_code}','{user.role_id}','{user.branch_id}','{user.email}')", new DynamicParameters());
+
+
 
             }
+            BankAccountModel newAcc = new BankAccountModel();
+            newAcc.name = "Personkonto";
+            newAcc.balance = 0;
+
+            int userId = GetUserID(user.email, user.pin_code);
+            CreateUserAcc(newAcc, userId);
+
         }
 
 
@@ -171,11 +180,12 @@ namespace Bank
             Console.WriteLine($"Nytt saldo: (från) {fromBalance} och  (till) {toBalance}");
             Console.ReadKey();
         }
-        public static void CreateUserAcc(BankAccountModel Account)
+        public static void CreateUserAcc(BankAccountModel Account, int userId)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{Person.id}',1, @balance )", Account);
+                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{userId}',1, @balance )", Account);
+
             }
         }
 

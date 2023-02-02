@@ -9,7 +9,8 @@ namespace Bank
         static void Main(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-            ShowMenu();
+            AdminMenu();
+            //ShowMenu();
         }
         // Shows a main menu to the user with options to login, or to exit the program
         private static void ShowMenu()
@@ -130,7 +131,7 @@ namespace Bank
                     newAcc.balance= accValue;
                     Console.WriteLine(newAcc.name + newAcc.balance);
                     Console.ReadKey();
-                    DataAccess.CreateUserAcc(newAcc);
+                    DataAccess.CreateUserAcc(newAcc, Person.id);
                     success= true;
 
                         }

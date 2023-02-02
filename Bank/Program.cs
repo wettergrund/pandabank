@@ -183,5 +183,53 @@ namespace Bank
             }
 
         }
+        static void AdminMenu()
+        {
+            Menu CreateAcoountMenu = new Menu(new string[] { "Skapa användare", "Gå tillbaka" });
+            bool showMenu = true;
+            while (showMenu)
+            {
+
+                switch (CreateAcoountMenu.UseMenu())
+                {
+                    case 0:
+                        // Get model of new user
+                        BankUserModel newUser = new BankUserModel();
+
+
+                        Console.Write("Ange förnamn: ");
+                        newUser.first_name = Console.ReadLine();
+                        Console.Write("Ange efternamn: ");
+                        newUser.last_name = Console.ReadLine();
+                        Console.Write("Ange mail: ");
+                        newUser.email = Console.ReadLine();
+                        Console.Write("Ange branch(1-2): ");
+                        newUser.branch_id = int.Parse(Console.ReadLine());
+
+                        //Generate pin for user
+                        Random random = new Random();
+                        newUser.pin_code = Convert.ToString(random.Next(1000, 9999));
+
+                        DataAccess.CreateUser(newUser);
+                        Console.WriteLine(
+                            @$"Användare har skapats
+                            Namn: {newUser.first_name} {newUser.last_name}
+                            Pinkod: {newUser.pin_code} ");
+
+
+                        Console.ReadLine();
+
+
+                        break;
+                    case 1:
+                        Console.WriteLine("Gå tillbaka");
+                        showMenu = false;
+                        break;
+                    case 2:
+                        break;
+                }
+            }
+
+        }
     }
 }

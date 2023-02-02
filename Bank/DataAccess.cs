@@ -180,6 +180,13 @@ namespace Bank
             Console.WriteLine($"Nytt saldo: (från) {fromBalance} och  (till) {toBalance}");
             Console.ReadKey();
         }
+        public static void CreateUserAcc(BankAccountModel Account)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{Person.id}',1, @balance )", Account);
+            }
+        }
         public static void CreateUserAcc(BankAccountModel Account, int userId)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))

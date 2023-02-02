@@ -130,7 +130,7 @@ namespace Bank
                     newAcc.balance= accValue;
                     Console.WriteLine(newAcc.name + newAcc.balance);
                     Console.ReadKey();
-                    DataAccess.CreateUserAcc(newAcc, Person.id);
+                    DataAccess.CreateUserAcc(newAcc);
                     success= true;
 
                         }

@@ -52,7 +52,7 @@ namespace Bank
                 }
             }
         }
-
+        //Checks if the user + pincode combo is correct
         public static bool CheckUserInfo(string email, string pin)
         {
             using (NpgsqlConnection cnn = new NpgsqlConnection(LoadConnectionString()))

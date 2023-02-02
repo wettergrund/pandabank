@@ -24,7 +24,6 @@ namespace Bank
         private char regularChar = '│'; // Char for the rest
 
         // Takes an array of strings on class instantiation
-        //And 
         public Menu() { }
         public Menu(string[] items)
         {

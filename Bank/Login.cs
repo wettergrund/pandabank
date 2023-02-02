@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -10,9 +11,7 @@ namespace Bank
 {
     public class Login
     {
-        private static string[] menuArray = new string[] { "Email:", "Pinkod:", "Gå tillbaka" };
-        readonly Menu LoginMenu = new Menu(menuArray);
-        private string menuItem = "";
+        readonly Menu LoginMenu = new Menu(new string[] { "Email:", "Pinkod:", "Gå tillbaka" });
         public bool LoginChecker()
         {
             ResetLoginData();
@@ -23,10 +22,10 @@ namespace Bank
                 {
                     case 0:
                         ResetLoginData();
-                        InputEmail();
+                        GetUserEmail();
                         break;
                     case 1:
-                        login = InputPincode();
+                        login = GetUserPincode();
                         break;
                     case 2:
                         return false;
@@ -34,35 +33,28 @@ namespace Bank
             }
             return true;
         }
-        private void ResetLoginData()
-        {
-            Person.Email = "";
-            Person.PinCode = "";
-            LoginMenu.SetMenuItem("Email:", 0);
-            LoginMenu.SelectIndex = 0;
-            LoginMenu.PrintSystem();
-        }
-        private void InputEmail()
+        // Prompts the user to enter their email, then validates it
+        private void GetUserEmail()
         {
             bool isEmail = true;
             while (isEmail)
             {
                 LoginMenu.MoveCursorRight();
-                isEmail = CheckEmail(Console.ReadLine());
-                LoginMenu.SetMenuItem("Email:" + menuItem, 0);
+                isEmail = ValidateEmail(Console.ReadLine());
             }
         }
-
-        private bool InputPincode()
+        // Prompts the user to enter their pincode, then validates it
+        private bool GetUserPincode()
         {
             bool pinCheck = true;
             while (pinCheck)
             {
                 LoginMenu.MoveCursorRight();
-                pinCheck = CheckPincode(Console.ReadLine());
+                pinCheck = ValidatePincode(MaskPincodeData());
                 LoginMenu.MoveCursorBottom();
             }
-
+            //If email is empty or Email/Pincode combo is wrong, gives the user a warning
+            //If they are correct, gets the ID and allows the user to log in
             if (string.IsNullOrWhiteSpace(Person.Email) || !DataAccess.CheckUserInfo(Person.Email, Person.PinCode))
             {
                 Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
@@ -76,25 +68,62 @@ namespace Bank
             return true;
         }
 
-        //Moves the cursor to the bottom, prints the given error/warning message to the user
-        //Then moves the cursor back
-        private void Warning(string menuItem, string message)
+        private string MaskPincodeData()
         {
-            LoginMenu.MoveCursorBottom();
-            Console.WriteLine(message);
-            LoginMenu.SetMenuItem(menuItem, LoginMenu.SelectIndex);
-            Console.ReadKey(true);
-            LoginMenu.MoveCursorTop();
+            string pin = "";
+            ConsoleKeyInfo keyInput;
+
+            do
+            {
+                keyInput = Console.ReadKey(true);
+
+                if (keyInput.Key != ConsoleKey.Backspace && keyInput.Key != ConsoleKey.Enter)
+                {
+                    pin += keyInput.KeyChar;
+                    Console.Write("*");
+                }
+                else
+                {
+                    if (keyInput.Key == ConsoleKey.Backspace && pin.Length > 0)
+                    {
+                        pin = pin.Substring(0, (pin.Length - 1));
+                        Console.Write("\b \b");
+                    }
+                }
+            }
+            while (keyInput.Key != ConsoleKey.Enter); // Exits the loop when Enter is pressed
+            return pin;
+        }
+
+        //Resets the stored email/pincode for Person.cs
+        //Also resets the menu prints to remove the previously stored email
+        private void ResetLoginData()
+        {
+            Person.Email = "";
+            Person.PinCode = "";
+            LoginMenu.SetMenuItem("Email:", 0);
+            LoginMenu.SelectIndex = 0;
             LoginMenu.PrintSystem();
         }
 
+        //Moves the cursor to the bottom, prints the given error/warning message to the user
+        //Resets the menu output and moves the cursor back
+        private void Warning(string menuItem, string errorMessage)
+        {
+            LoginMenu.MoveCursorBottom();
+            Console.WriteLine(errorMessage);
+            LoginMenu.SetMenuItem(menuItem, LoginMenu.SelectIndex);
+            Console.ReadKey(true);
+            LoginMenu.MoveCursorTop();
+        }
+
         // Checks if email only has allowed characters (Alphabetic letters, numbers and underscore)
-        private bool CheckEmail(string email)
+        private bool ValidateEmail(string email)
         {
             if(Regex.IsMatch(email, @"^[a-zA-Z0-9_@.]+$"))
             {
                 Person.Email = Helper.FormatString(email);
-                menuItem = Person.Email;
+                LoginMenu.SetMenuItem("Email:" + Person.Email, 0);
                 return false;
             }
             ResetLoginData();
@@ -103,7 +132,7 @@ namespace Bank
         }
 
         //Checks if password only contains integers
-        private bool CheckPincode(string pincode)
+        private bool ValidatePincode(string pincode)
         {
             bool success = int.TryParse(pincode, out int result);
             if(success && pincode.Length <= 4)

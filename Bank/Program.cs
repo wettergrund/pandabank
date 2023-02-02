@@ -14,14 +14,14 @@ namespace Bank
         private static void ShowMenu()
         {
             Menu MainMenu = new Menu(new string[] { "Logga in", "Stäng programmet" });
-            Login login = new Login();
+            Login BankLogin = new Login(); // 
             bool showMenu = true;
             while(showMenu)
             {
                 switch (MainMenu.UseMenu())
                 {
                     case 0:
-                        if (login.LoginChecker())
+                        if (BankLogin.LoginChecker())
                         {
                             ShowUserMenu();
                         }

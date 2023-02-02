@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using DatabaseTesting;
 using Npgsql;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,15 @@ namespace Bank
             {
                 var output = cnn.Query<BankAccountModel>($"SELECT name, balance, id FROM bank_account WHERE user_id = '{user_id}' ORDER BY name ASC, balance ASC, id ASC", new DynamicParameters());
                 return output.ToList();
+            }
+        }
+        public static List<BankUserModel> GetUserData(int user_id)
+        {
+            using(IDbConnection cnn =new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, pin_code , role_id , branch_id FROM bank_user WHERE id = '{user_id}'", new DynamicParameters());
+                return output.ToList();
+
             }
         }
         public static List<BankAccountModel> GetTransferAccountData(int user_id, int accountID)
@@ -149,6 +159,21 @@ namespace Bank
 
             Console.WriteLine($"Nytt saldo: (från) {fromBalance} och  (till) {toBalance}");
             Console.ReadKey();
+        }
+        public static void CreateUserAcc(BankAccountModel Account)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{Person.id}',1, @balance )", Account);
+            }
+        }
+
+        public static void DeleteUserAcc(int delAccount)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"DELETE FROM bank_account WHERE id='{delAccount}'");
+            }
         }
 
         private static string LoadConnectionString(string id = "Default")

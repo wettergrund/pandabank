@@ -1,5 +1,6 @@
 ﻿using DatabaseTesting;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Bank
 {
@@ -36,7 +37,7 @@ namespace Bank
         // Checking balance to their accounts, transfers between their own accounts and logging out.
         private static void ShowUserMenu()
         {
-            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Logga ut" });
+            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton","Skapa ett nytt konto","Ta bort ett konto", "Logga ut" });
             bool showMenu = true;
             while (showMenu)
             {
@@ -49,6 +50,12 @@ namespace Bank
                         MoveMoney(Person.id);
                         break;
                     case 2:
+                        CreatNewAcc();
+                        break;
+                    case 3:
+                        DeleteAcc(Person.id);
+                        break;
+                    case 4:
                         showMenu = false;
                         break;
                 }
@@ -74,6 +81,107 @@ namespace Bank
                     DataAccess.UpdateBalance(selectedFromId, selectedToId);
                 }
             }
+        }
+        //Method to creat a savings account
+        public static void CreatNewAcc()
+        {
+                BankAccountModel newAcc = new BankAccountModel();
+                Console.Write("Kontonamn: ");
+                string accName = Console.ReadLine();
+                if (!Regex.IsMatch(accName, @"^[a-zA-Z]+$"))
+                {
+                    Console.WriteLine("Du kan bara skapa konton med bokstäver");
+                    Console.ReadKey();
+                }
+                else
+                {
+                    newAcc.name = accName;
+               bool success = true;
+                do
+                {
+                    Console.WriteLine("Hur mycket pengar vill du sätta in?");
+                    Console.Write(accName + ": ");
+
+                    string? amount = Console.ReadLine();
+                    amount = amount.Replace(",", ".");
+                    var amountsplit = amount.Split(".");
+                    bool succAmount = decimal.TryParse(amount, out decimal accValue);
+
+                    if (amountsplit.Length > 1 && amountsplit[1].Length > 2)
+                    {
+                        Console.WriteLine("Du kan max ange 99 ören");
+                        Console.ReadKey();
+                        success = false;
+                    }
+                    else if(!succAmount)
+                    {
+                    Console.WriteLine("Var vänligen använde inte bokstäver");
+                    Console.ReadKey();
+                    }
+                    else
+                    {
+                        if(accValue < 0)
+                        {
+                            Console.WriteLine("Du kan inte sätt in minus duh");
+                            Console.ReadKey();
+                        }
+                        else
+                        {
+                    newAcc.balance= accValue;
+                    Console.WriteLine(newAcc.name + newAcc.balance);
+                    Console.ReadKey();
+                    DataAccess.CreateUserAcc(newAcc);
+                    success= true;
+
+                        }
+                    }
+                }
+                while (!success);
+                }
+        }
+
+        public static void DeleteAcc(int userID)
+        {
+            
+            Menu accountMenu = new Menu();
+            List<BankAccountModel> selectedAcc = accountMenu.CreateTransferMenu(userID, -1);
+            List<BankUserModel> pincheck = DataAccess.GetUserData(userID);
+            int deleteAcc;
+            while(true)
+            {
+                accountMenu.Output = "Välj konto att radera.";
+                deleteAcc = accountMenu.UseMenu();
+                if (deleteAcc == accountMenu.GetMenu().Length - 1)
+                {
+                    break;
+                }
+                else if (selectedAcc[deleteAcc].balance > 0)
+                {
+                    Console.WriteLine("Du har pengar kvar på detta konto, sicka över pengarna till ett annat för att radera.");
+                    Console.ReadKey();
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Vänligen skriv in din pinkod för ta bort kontot.");
+                    Console.Write("Pinkod: ");
+                    string pincode = Console.ReadLine();
+                    if (pincode == pincheck.First().pin_code)
+                    { 
+                        Console.WriteLine("Ditt konto " + selectedAcc[deleteAcc].name + " har raderats.");
+                        Console.ReadKey();
+                        DataAccess.DeleteUserAcc(selectedAcc[deleteAcc].id);
+                    break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Fel pinkod skriv rätt hallå");
+                        Console.ReadKey();
+                        
+                    }
+                }
+            }
+
         }
     }
 }

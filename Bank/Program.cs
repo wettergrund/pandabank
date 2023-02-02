@@ -47,7 +47,7 @@ namespace Bank
                         ShowAccountBalance(Person.id);
                         break;
                     case 1:
-                        MoveMoney(Person.id);
+                        MoveMoney();
                         break;
                     case 2:
                         CreatNewAcc();

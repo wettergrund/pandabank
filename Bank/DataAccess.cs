@@ -25,7 +25,7 @@ namespace Bank
         }
         public static List<BankUserModel> GetUserData(int user_id)
         {
-            using(IDbConnection cnn =new NpgsqlConnection(LoadConnectionString()))
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, pin_code , role_id , branch_id FROM bank_user WHERE id = '{user_id}'", new DynamicParameters());
                 return output.ToList();
@@ -46,7 +46,7 @@ namespace Bank
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 var output = cnn.Query($"SELECT balance FROM bank_account WHERE id = '{accountID}' AND balance >= '{funds}'");
-                if(output.Count() > 0)
+                if (output.Count() > 0)
                 {
                     return true;
                 }
@@ -56,14 +56,14 @@ namespace Bank
         // Checks if the users exists in the database
         public static bool CheckUserExists(string email)
         {
-            using (NpgsqlConnection cnn = new NpgsqlConnection(LoadConnectionString())) 
+            using (NpgsqlConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 cnn.Open();
                 var sql = $"SELECT COUNT(*) FROM bank_user WHERE email = '{email}'";
                 var cmd = new NpgsqlCommand(sql, cnn);
                 cmd.Parameters.AddWithValue("email", email);
                 bool userExists = (long)cmd.ExecuteScalar() > 0;
-                if(userExists)
+                if (userExists)
                 {
                     cnn.Close();
                     return true;
@@ -96,6 +96,24 @@ namespace Bank
                     return false;
                 }
             }
+        }
+        public static void CreateUser(BankUserModel user)
+        {
+            //ResetIndex();
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Query($"INSERT INTO bank_user (first_name, last_name, pin_code, role_id, branch_id, email) VALUES ('{user.first_name}','{user.last_name}','{user.pin_code}','{user.role_id}','{user.branch_id}','{user.email}')", new DynamicParameters());
+
+
+
+            }
+            BankAccountModel newAcc = new BankAccountModel();
+            newAcc.name = "Personkonto";
+            newAcc.balance = 0;
+
+            int userId = GetUserID(user.email, user.pin_code);
+            CreateUserAcc(newAcc, userId);
+
         }
 
         public static int GetUserID(string email)
@@ -136,13 +154,29 @@ namespace Bank
             }
         }
 
+        public static bool AdminAccess()
+        {
+            //Return true / false if user is admin
+            bool isAdmin;
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT * FROM bank_user u INNER JOIN bank_role r ON u.role_id = r.id WHERE u.id = '{Person.id}'", new DynamicParameters());
+
+                isAdmin = output[0].is_admin;
+
+            }
+            return isAdmin;
+        }
+
+
         public static void UpdateBalance(int fromAccountID, int toAccountID)
         {
             /* Method that move money from one account to another account, based on accounts DB ID */
             decimal amount;
             bool successfulInput;
 
-            do {
+            do
+            {
                 Console.Clear();
                 Console.WriteLine("Ange en summa");
                 string? enteredValue = Console.ReadLine();
@@ -153,7 +187,7 @@ namespace Bank
 
                 successfulInput = decimal.TryParse(enteredValue, out amount);
 
-                if(amount < 0)
+                if (amount < 0)
                 {
                     Console.WriteLine("Negativa summor funkar ej.");
                     Console.ReadKey();
@@ -210,6 +244,14 @@ namespace Bank
                 cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{Person.id}',1, @balance )", Account);
             }
         }
+        public static void CreateUserAcc(BankAccountModel Account, int userId)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{userId}',1, @balance )", Account);
+
+            }
+        }
 
         public static void DeleteUserAcc(int delAccount)
         {
@@ -218,6 +260,19 @@ namespace Bank
                 cnn.Execute($"DELETE FROM bank_account WHERE id='{delAccount}'");
             }
         }
+        public static List<BankAccountModel> CurrencyExchange(int userID)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankAccountModel>(@$"SELECT  bank_account.id,bank_account.user_id, bank_account.name AS account_name, balance, bank_currency.name AS currency_name, bank_currency.exchange_rate AS test,CAST(balance*bank_currency.exchange_rate AS decimal(10,2)) AS SEK FROM  bank_account JOIN bank_currency ON bank_account.currency_id = bank_currency.id 
+WHERE bank_account.user_id={userID};");
+
+                return output.ToList();
+
+
+            }
+        }
+
 
         private static string LoadConnectionString(string id = "Default")
         {

@@ -218,6 +218,19 @@ namespace Bank
                 cnn.Execute($"DELETE FROM bank_account WHERE id='{delAccount}'");
             }
         }
+        public static List<BankAccountModel> CurrencyExchange(int userID)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankAccountModel>(@$"SELECT  bank_account.id,bank_account.user_id, bank_account.name AS account_name, balance, bank_currency.name AS currency_name, bank_currency.exchange_rate AS test,CAST(balance*bank_currency.exchange_rate AS decimal(10,2)) AS SEK FROM  bank_account JOIN bank_currency ON bank_account.currency_id = bank_currency.id 
+WHERE bank_account.user_id={userID};");
+
+                return output.ToList();
+
+             
+            }
+        }
+
 
         private static string LoadConnectionString(string id = "Default")
         {

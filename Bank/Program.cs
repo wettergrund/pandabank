@@ -8,6 +8,8 @@ namespace Bank
     {
         static void Main(string[] args)
         {
+           
+           
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             ShowMenu();
         }
@@ -184,6 +186,19 @@ namespace Bank
                     }
                 }
             }
+
+        }
+        //Method to convert currency
+        public static void CurrencyConvert()
+        {
+            List<BankAccountModel> bankAccountModels = DataAccess.CurrencyExchange(1);
+
+            foreach (var bankAccountModel in bankAccountModels)
+            {
+
+                Console.WriteLine(bankAccountModel.sek);
+            }
+
 
         }
         static void AdminMenu()

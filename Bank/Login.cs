@@ -26,7 +26,7 @@ namespace Bank
                         break;
                     case 1:
                         login = GetUserPincode();
-                        break;
+                        return login;
                     case 2:
                         return false;
                 } 
@@ -53,10 +53,28 @@ namespace Bank
                 pinCheck = ValidatePincode(MaskPincodeData());
                 LoginMenu.MoveCursorBottom();
             }
+
+            //If pincode is incorrect
+            if (!pinCheck)
+            {
+                DataAccess.LoginAttempt();
+                bool isLocked = DataAccess.IsLocked();
+                if (isLocked)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Konto låst");
+                    Console.ReadLine();
+                    Console.ResetColor();
+                    return false;
+                }
+            }
+
             //If email is empty or Email/Pincode combo is wrong, gives the user a warning
             //If they are correct, gets the ID and allows the user to log in
             if (string.IsNullOrWhiteSpace(Person.Email) || !DataAccess.CheckUserInfo(Person.Email, Person.PinCode))
             {
+  
+                
                 Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
                 Console.ReadKey();
             }
@@ -110,6 +128,8 @@ namespace Bank
         //Resets the menu output and moves the cursor back
         private void Warning(string menuItem, string errorMessage)
         {
+ 
+
             LoginMenu.MoveCursorBottom();
             Console.WriteLine(errorMessage);
             LoginMenu.SetMenuItem(menuItem, LoginMenu.SelectIndex);

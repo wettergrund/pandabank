@@ -176,12 +176,39 @@ namespace Bank
             }
         }
 
-        public static void LoginAttempt(int userId)
+        public static void LoginAttempt()
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                cnn.Execute($"DELETE FROM bank_account WHERE id='{userId}'");
+                cnn.Execute($@"
+                UPDATE bank_user
+                SET attempts = CASE
+                    WHEN attempts > 0 THEN attempts - 1
+                    ELSE 0
+                END
+                WHERE (email = '{Person.Email}');
+
+                UPDATE bank_user
+                SET locked = CASE
+                    WHEN attempts = 0 THEN true
+                    else false
+                END
+                WHERE (email = '{Person.Email}');
+                ");
             }
+        }
+
+        public static bool IsLocked()
+        {
+            bool result;
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT locked FROM bank_user WHERE email = '{Person.Email}'", new DynamicParameters());
+            
+                result = Convert.ToBoolean(output[0].locked);
+
+            }
+            return result;
         }
 
 

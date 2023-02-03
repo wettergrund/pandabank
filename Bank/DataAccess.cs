@@ -113,6 +113,21 @@ namespace Bank
             }
         }
 
+        public static bool AdminAccess()
+        {
+            //Return true / false if user is admin
+            bool isAdmin;
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT * FROM bank_user u INNER JOIN bank_role r ON u.role_id = r.id WHERE u.id = '{Person.id}'", new DynamicParameters());
+
+                isAdmin = output[0].is_admin;
+
+            }
+            return isAdmin;
+        }
+
+
         public static void UpdateBalance(int fromAccountID, int toAccountID)
         {
             /* Method that move money from one account to another account, based on accounts DB ID */

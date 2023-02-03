@@ -38,7 +38,10 @@ namespace Bank
         private static void ShowUserMenu()
         {
             Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton","Skapa ett nytt konto","Ta bort ett konto", "Logga ut" });
+            
+            bool isAdmin = DataAccess.AdminAccess();
             bool showMenu = true;
+
             while (showMenu)
             {
                 switch (UserMenu.UseMenu())

@@ -14,8 +14,6 @@ namespace Bank
         readonly Menu LoginMenu = new Menu(new string[] { "Email:", "Pinkod:", "Gå tillbaka" });
         public bool LoginChecker()
         {
-            Person.attempts = 0;
-
             ResetLoginData();
             bool login = true;
             while(login)
@@ -31,7 +29,7 @@ namespace Bank
                         
                         login = GetUserPincode();
 
-                        // 
+                        //If user should be locked out from bank
                         bool attemptsLeft = CheckAttemtps();
                         if (!attemptsLeft)
                         {
@@ -85,12 +83,13 @@ namespace Bank
             //If they are correct, gets the ID and allows the user to log in
             if (string.IsNullOrWhiteSpace(Person.Email) || !DataAccess.CheckUserInfo(Person.Email, Person.PinCode))
             {
+                //Check number of login attempts. 
                 Person.attempts++;
                 bool attemptsLeft = CheckAttemtps();
                 if (!attemptsLeft)
                 {
                     Console.GetCursorPosition();
-                    Console.WriteLine("För många misslyckade försök, du kommer skickas tillbaka.");
+                    Console.WriteLine("För många misslyckade försök, du kommer låsas ut från banken.");
                     Console.ReadLine();
                     return false;
                 }

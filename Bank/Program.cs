@@ -21,9 +21,16 @@ namespace Bank
             bool showMenu = true;
             while(showMenu)
             {
+                if (Person.attempts == 3)
+                {
+                    showMenu = false;
+                    break;
+                }
+
                 switch (MainMenu.UseMenu())
                 {
                     case 0:
+                        
                         if (BankLogin.LoginChecker())
                         {
                             ShowUserMenu();

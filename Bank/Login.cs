@@ -14,10 +14,13 @@ namespace Bank
         readonly Menu LoginMenu = new Menu(new string[] { "Email:", "Pinkod:", "Gå tillbaka" });
         public bool LoginChecker()
         {
+            Person.attempts = 0;
+
             ResetLoginData();
             bool login = true;
             while(login)
             {
+ 
                 switch (LoginMenu.UseMenu())
                 {
                     case 0:
@@ -25,7 +28,16 @@ namespace Bank
                         GetUserEmail();
                         break;
                     case 1:
+                        
                         login = GetUserPincode();
+
+                        // 
+                        bool attemptsLeft = CheckAttemtps();
+                        if (!attemptsLeft)
+                        {
+                            return false;
+                        }
+                        
                         break;
                     case 2:
                         return false;
@@ -33,6 +45,21 @@ namespace Bank
             }
             return true;
         }
+
+        static bool CheckAttemtps()
+        {
+                       
+            if(Person.attempts == 3)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+
+        }
+
         // Prompts the user to enter their email, then validates it
         private void GetUserEmail()
         {
@@ -46,6 +73,7 @@ namespace Bank
         // Prompts the user to enter their pincode, then validates it
         private bool GetUserPincode()
         {
+            
             bool pinCheck = true;
             while (pinCheck)
             {
@@ -57,6 +85,17 @@ namespace Bank
             //If they are correct, gets the ID and allows the user to log in
             if (string.IsNullOrWhiteSpace(Person.Email) || !DataAccess.CheckUserInfo(Person.Email, Person.PinCode))
             {
+                Person.attempts++;
+                bool attemptsLeft = CheckAttemtps();
+                if (!attemptsLeft)
+                {
+                    Console.GetCursorPosition();
+                    Console.WriteLine("För många misslyckade försök, du kommer skickas tillbaka.");
+                    Console.ReadLine();
+                    return false;
+                }
+
+                
                 Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
                 Console.ReadKey();
             }

@@ -201,6 +201,9 @@ namespace Bank
 
 
         }
+
+
+
         static void AdminMenu()
         {
             Menu CreateAcoountMenu = new Menu(new string[] { "Skapa användare", "Gå tillbaka" });

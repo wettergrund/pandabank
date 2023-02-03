@@ -176,10 +176,21 @@ namespace Bank
             }
         }
 
+        public static void LoginAttempt(int userId)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"DELETE FROM bank_account WHERE id='{userId}'");
+            }
+        }
+
+
         private static string LoadConnectionString(string id = "Default")
         {
             return ConfigurationManager.ConnectionStrings[id].ConnectionString;
         }
+
+
 
     }
 }

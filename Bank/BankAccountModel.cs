@@ -18,6 +18,8 @@ namespace Bank
 
         public decimal balance { get; set; }
 
+        public decimal sek { get; set; }
+
         public double interest_rate { get; set; }
 
         public string currency_name { get; set; }

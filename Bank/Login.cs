@@ -127,7 +127,7 @@ namespace Bank
                 return false;
             }
             ResetLoginData();
-            Warning("Email:", "Fel användarnamn eller lösenord. Försök igen.");
+            Warning("Email:", "Otillåtna tecken. Försök igen.");
             return true;
         }
 

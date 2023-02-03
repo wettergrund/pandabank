@@ -142,7 +142,6 @@ namespace Bank
 
         public static void DeleteAcc(int userID)
         {
-            
             Menu accountMenu = new Menu();
             List<BankAccountModel> selectedAcc = accountMenu.CreateTransferMenu(userID, -1);
             List<BankUserModel> pincheck = DataAccess.GetUserData(userID);

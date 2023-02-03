@@ -27,13 +27,11 @@ namespace Bank
                         FromAccount();
                         break;
                     case 1:
-                        TransferMenu.SetMenuItem("Till:", 1);
-                        TransferMenu.PrintSystem();
+                        ResetRow("Till:");
                         ToUser();
                         break;
                     case 2:
-                        TransferMenu.SetMenuItem("Summa:", 2);
-                        TransferMenu.PrintSystem();
+                        ResetRow("Summa:");
                         AmountToTransfer();
                         break;
                     case 3:
@@ -130,6 +128,11 @@ namespace Bank
             TransferMenu.SetMenuItem("Välj Konto:", 0);
             TransferMenu.SetMenuItem("Till:", 1);
             TransferMenu.SetMenuItem("Summa:", 2);
+            TransferMenu.PrintSystem();
+        }
+        private void ResetRow(string row)
+        {
+            TransferMenu.SetMenuItem(row, TransferMenu.SelectIndex);
             TransferMenu.PrintSystem();
         }
 

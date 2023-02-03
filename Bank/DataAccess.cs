@@ -129,7 +129,7 @@ namespace Bank
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Execute($@"
+                var output = cnn.Query($@"
                     UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{from_account}';
                     UPDATE bank_account SET balance=balance + '{amount}' WHERE id='{to_account}';
                     INSERT INTO bank_transaction (name, from_account_id, to_account_id) VALUES ('Överföring - {amount}', '{from_account}', '{to_account}');");

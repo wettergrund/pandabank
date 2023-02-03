@@ -37,7 +37,8 @@ namespace Bank
         // Checking balance to their accounts, transfers between their own accounts and logging out.
         private static void ShowUserMenu()
         {
-            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton","Skapa ett nytt konto","Ta bort ett konto", "Logga ut" });
+            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton","Överför till användare","Skapa ett nytt konto","Ta bort ett konto", "Logga ut" });
+            UserTransfers transfers = new UserTransfers();
             bool showMenu = true;
             while (showMenu)
             {
@@ -50,12 +51,15 @@ namespace Bank
                         MoveMoney(Person.id);
                         break;
                     case 2:
-                        CreatNewAcc();
+                        transfers.Transfer();
                         break;
                     case 3:
-                        DeleteAcc(Person.id);
+                        CreatNewAcc();
                         break;
                     case 4:
+                        DeleteAcc(Person.id);
+                        break;
+                    case 5:
                         showMenu = false;
                         break;
                 }
@@ -180,7 +184,6 @@ namespace Bank
                     }
                 }
             }
-
         }
     }
 }

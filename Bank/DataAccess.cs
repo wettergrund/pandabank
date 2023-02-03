@@ -40,6 +40,18 @@ namespace Bank
                 return output.ToList();
             }
         }
+        public static bool CheckAccountFunds(int accountID, decimal funds)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query($"SELECT balance FROM bank_account WHERE id = '{accountID}' AND balance >= '{funds}'");
+                if(output.Count() > 0)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
         // Checks if the users exists in the database
         public static bool CheckUserExists(string email)
         {

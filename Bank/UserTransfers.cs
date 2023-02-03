@@ -11,11 +11,13 @@ namespace Bank
     internal class UserTransfers
     {
         readonly Menu TransferMenu = new Menu(new string[] { "Välj konto:", "Till:", "Summa:", "Överför" ,"Gå tillbaka" });
-        int fromID;
-        string? reciever;
+        int fromID, toID;
+        string? toEmail;
         decimal amount;
         public bool Transfer()
         {
+            ResetTransferData();
+            TransferMenu.SelectIndex = 0;
             bool isTransfering = true;
             while (isTransfering)
             {
@@ -59,7 +61,7 @@ namespace Bank
                 }
                 else
                 {
-                    TransferMenu.SetMenuItem("Välj konto: " + options[selectedRow].name, 0);
+                    TransferMenu.SetMenuItem("Valt konto: " + options[selectedRow].name + " - " + options[selectedRow].balance, 0);
                     fromID = options[selectedRow].id;
                     break;
                 }
@@ -82,7 +84,7 @@ namespace Bank
         {
             // Checka ifall mängden pengar finns på valda kontot
             // Varna annars användaren
-            Console.WriteLine("Summa?");
+            TransferMenu.MoveCursorRight();
             string answer = Console.ReadLine();
             bool success = decimal.TryParse(answer, out amount);
             if(success)
@@ -90,25 +92,41 @@ namespace Bank
                 bool enoughFunds = DataAccess.CheckAccountFunds(fromID, amount);
                 if (enoughFunds)
                 {
-                    TransferMenu.SetMenuItem("Summa: " + amount.ToString(), 2);
+                    TransferMenu.SetMenuItem("Summa:" + amount.ToString(), 2);
                 }
                 else
                 {
                     amount = 0;
-                    Warning("test", "Inte tillräcklig täckning på kontot. Försök igen.");
+                    Warning("Inte tillräcklig täckning på kontot. Försök igen.");
                 }
             }
         }
 
         private void BeginTransaction()
         {
-            // Be användaren bekräfta med pinkod för att föra över pengarna.
-            Console.WriteLine("Transaction started.");
-            Console.ReadKey();
+            // Checks that all the required variables have valid values
+            if(amount > 0 && !string.IsNullOrWhiteSpace(toEmail) && fromID > -1)
+            {
+                Console.WriteLine("Transaction started.");
+                int transferID = DataAccess.GetUserID(toEmail);
+                toID = DataAccess.GetAccountID(transferID);
+                DataAccess.TransferToUser(fromID, toID, amount);
+                Console.WriteLine("Transaction completed!");
+                ResetTransferData();
+                Console.ReadKey();
+            }
+            // Hämta ID för mottagaren
+            
+            // Hämta ID för första kontot hos mottagaren
+            // DataAcces för överföring
+            // Skapa en transaktionslogg  
         }
 
         private void ResetTransferData()
         {
+            fromID = 0;
+            toEmail = "";
+            amount = 0;
             TransferMenu.SetMenuItem("Välj Konto:", 0);
             TransferMenu.SetMenuItem("Till:", 1);
             TransferMenu.SetMenuItem("Summa:", 2);
@@ -117,7 +135,7 @@ namespace Bank
 
         //Moves the cursor to the bottom, prints the given error/warning message to the user
         //Resets the menu output and moves the cursor back
-        private void Warning(string menuItem, string errorMessage)
+        private void Warning(string errorMessage)
         {
             TransferMenu.MoveCursorBottom();
             Console.WriteLine(errorMessage);
@@ -130,19 +148,25 @@ namespace Bank
         {
             if (Regex.IsMatch(email, @"^[a-zA-Z0-9_@.]+$"))
             {
-                reciever = Helper.FormatString(email);
-                if(DataAccess.CheckUserExists(reciever))
+                toEmail = Helper.FormatString(email);
+                if(DataAccess.CheckUserExists(toEmail))
                 {
-                    TransferMenu.SetMenuItem("Till:" + reciever, 1);
+                    TransferMenu.SetMenuItem("Till:" + toEmail, 1);
                     return false;
                 }
                 else
                 {
-                    Warning("test", "Skriv in en existerande användare!");
+                    TransferMenu.SetMenuItem("Till:", TransferMenu.SelectIndex);
+                    Warning("Skriv in en existerande användare!");
                 }
             }
-            ResetTransferData();
-            //Warning("Email:", "Otillåtna tecken. Försök igen.");
+            else
+            {
+                //ResetTransferData();
+                toEmail = "";
+                Warning("Otillåtna tecken. Försök igen.");
+                TransferMenu.PrintSystem();
+            }
             return true;
         }
     }

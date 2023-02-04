@@ -8,6 +8,8 @@ namespace Bank
     {
         static void Main(string[] args)
         {
+           
+           
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             ShowMenu();
         }
@@ -19,9 +21,16 @@ namespace Bank
             bool showMenu = true;
             while(showMenu)
             {
+                if (Person.attempts == 3)
+                {
+                    showMenu = false;
+                    break;
+                }
+
                 switch (MainMenu.UseMenu())
                 {
                     case 0:
+                        
                         if (BankLogin.LoginChecker())
                         {
                             ShowUserMenu();
@@ -38,7 +47,10 @@ namespace Bank
         private static void ShowUserMenu()
         {
             Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton","Skapa ett nytt konto","Ta bort ett konto", "Logga ut" });
+            
+            bool isAdmin = DataAccess.AdminAccess();
             bool showMenu = true;
+
             while (showMenu)
             {
                 switch (UserMenu.UseMenu())
@@ -47,7 +59,7 @@ namespace Bank
                         ShowAccountBalance(Person.id);
                         break;
                     case 1:
-                        MoveMoney(Person.id);
+                        MoveMoney();
                         break;
                     case 2:
                         CreatNewAcc();
@@ -70,7 +82,7 @@ namespace Bank
             BalanceMenu.UseMenu();
         }
         // Method that allows user to send money between their own accounts
-        private static void MoveMoney(int userId = 2)
+        private static void MoveMoney()
         {
             int selectedFromId = SelectAccount.FromID();
             if(selectedFromId > 0)
@@ -179,6 +191,92 @@ namespace Bank
                         Console.ReadKey();
                         
                     }
+                }
+            }
+
+        }
+        //Method to convert currency
+        public static void CurrencyConvert()
+        {
+            List<BankAccountModel> bankAccountModels = DataAccess.CurrencyExchange(1);
+
+            foreach (var bankAccountModel in bankAccountModels)
+            {
+
+                Console.WriteLine(bankAccountModel.sek);
+            }
+
+
+        }
+
+
+
+        static void AdminMenu()
+        {
+            Menu CreateAcoountMenu = new Menu(new string[] { "Skapa användare", "Gå tillbaka" });
+            bool showMenu = true;
+            while (showMenu)
+            {
+
+                switch (CreateAcoountMenu.UseMenu())
+                {
+                    case 0:
+                        // Get model of new user
+                        BankUserModel newUser = new BankUserModel();
+                        Regex regex = new Regex(@"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$",
+                                    RegexOptions.CultureInvariant | RegexOptions.Singleline);
+                        bool isValidEmail = false;
+                        do
+                        {
+                            Console.Clear();
+                            Console.CursorTop = 0;
+                            Console.Write($"Ange förnamn: ");
+                            newUser.first_name = Console.ReadLine();
+                            Console.Write($"Ange efternamn: ");
+                            newUser.last_name = Console.ReadLine();
+
+                            // Error handling for incorrect name.
+                            bool isValidName = newUser.first_name.Length > 0 && newUser.last_name.Length > 0 ? true : false;
+                            if (!isValidName)
+                            {
+                                Console.WriteLine($"Du måste ange både för och efternamn!");
+                                Console.ReadLine();
+                                continue;
+                            }
+
+                            Console.Write($"Ange mail: ");
+                            newUser.email = Console.ReadLine();
+                            
+                            // Error handling for incorrect email.
+                            isValidEmail = regex.IsMatch(newUser.email);
+                            if (!isValidEmail)
+                            {
+                                Console.WriteLine($"Mailadressen du angett ({newUser.email}) är felaktig. Var god försök igen.");
+                                Console.ReadLine();
+                            }
+                        }
+                        while (!isValidEmail);
+
+                        newUser.branch_id = 3;
+
+                        //Generate pin for user
+                        Random random = new Random();
+                        newUser.pin_code = Convert.ToString(random.Next(1000, 9999));
+
+                        DataAccess.CreateUser(newUser);
+                        Console.WriteLine($"\nAnvändare har skapats\nMail: {newUser.email}\nNamn: {newUser.first_name} {newUser.last_name}\nPinkod: {newUser.pin_code} ");
+
+
+                        Console.ReadLine();
+
+
+                        break;
+                    case 1:
+                        Console.WriteLine("Gå tillbaka");
+                        showMenu = false;
+                        break;
+                    case 2:
+                        break;
                 }
             }
 

@@ -29,12 +29,12 @@ namespace Bank
                         
                         login = GetUserPincode();
 
-                        //If user should be locked out from bank
-                        bool attemptsLeft = CheckAttemtps();
-                        if (!attemptsLeft)
-                        {
-                            return false;
-                        }
+                        ////If user should be locked out from bank
+                        //bool attemptsLeft = CheckAttemtps();
+                        //if (!attemptsLeft)
+                        //{
+                        //    return false;
+                        //}
                         
                         break;
                     case 2:
@@ -81,38 +81,43 @@ namespace Bank
             }
 
             //If pincode is incorrect
-            if (!pinCheck)
-            {
-                DataAccess.LoginAttempt();
-                bool isLocked = DataAccess.IsLocked();
-                if (isLocked)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Konto låst");
-                    Console.ReadLine();
-                    Console.ResetColor();
-                    return false;
-                }
-            }
+            
 
             //If email is empty or Email/Pincode combo is wrong, gives the user a warning
             //If they are correct, gets the ID and allows the user to log in
             if (string.IsNullOrWhiteSpace(Person.Email) || !DataAccess.CheckUserInfo(Person.Email, Person.PinCode))
             {
-                //Check number of login attempts. 
-                Person.attempts++;
-                bool attemptsLeft = CheckAttemtps();
-                if (!attemptsLeft)
+                ////Check number of login attempts. 
+                //Person.attempts++;
+                //bool attemptsLeft = CheckAttemtps();
+                //if (!attemptsLeft)
+                //{
+                //    Console.GetCursorPosition();
+                //    Console.WriteLine("För många misslyckade försök, du kommer låsas ut från banken.");
+                //    Console.ReadLine();
+                //    return false;
+                //}
+                if (!pinCheck)
                 {
-                    Console.GetCursorPosition();
-                    Console.WriteLine("För många misslyckade försök, du kommer låsas ut från banken.");
-                    Console.ReadLine();
-                    return false;
+                    DataAccess.LoginAttempt();
+                    bool isLocked = DataAccess.IsLocked();
+                    if (isLocked)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Konto låst, kontakta banken för att få det upplåst");
+                        Console.ReadLine();
+                        Console.ResetColor();
+                        //return false;
+                    }
+                   
+                }
+                else
+                {
+                        Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
+                        Console.ReadKey();
+
                 }
 
-                
-                Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
-                Console.ReadKey();
             }
             else
             {

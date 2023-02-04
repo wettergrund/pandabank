@@ -119,7 +119,7 @@ namespace Bank
             bool isAdmin;
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT * FROM bank_user u INNER JOIN bank_role r ON u.role_id = r.id WHERE u.id = '{Person.id}'", new DynamicParameters());
+                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT * FROM bank_user u INNER JOIN bank_role r ON u.role_id = r.id WHERE u.email = '{Person.Email}'", new DynamicParameters());
 
                 isAdmin = output[0].is_admin;
 
@@ -261,14 +261,32 @@ WHERE bank_account.user_id={userID};");
             }
         }
 
+        public static void LoginReset()
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($@"
+                UPDATE bank_user
+                SET attempts = 3
+                WHERE (email = '{Person.Email}');
+                ");
+            }
+        }
+
         public static bool IsLocked()
         {
             bool result;
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT locked FROM bank_user WHERE email = '{Person.Email}'", new DynamicParameters());
-            
-                result = Convert.ToBoolean(output[0].locked);
+                try
+                {
+                    result = Convert.ToBoolean(output[0].locked);
+                }
+                catch
+                {
+                    result = false;
+                }
 
             }
             return result;

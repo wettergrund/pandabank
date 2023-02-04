@@ -163,16 +163,22 @@ namespace Bank
 
 
             decimal fromBalance;
+            string fromAccountName;
+
             decimal toBalance;
+            string toAccountName;
+
 
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankAccountModel>($"SELECT balance FROM bank_account WHERE id = '{fromAccountID}' ORDER BY name ASC, balance ASC", new DynamicParameters());
+                var output = cnn.Query<BankAccountModel>($"SELECT balance, name FROM bank_account WHERE id = '{fromAccountID}' ORDER BY name ASC, balance ASC", new DynamicParameters());
                 List<BankAccountModel> tempList = output.ToList();
+                fromAccountName = tempList[0].name;
                 fromBalance = Convert.ToDecimal(tempList[0].balance);
 
-                output = cnn.Query<BankAccountModel>($"SELECT balance FROM bank_account WHERE id = '{toAccountID}' ORDER BY name ASC, balance ASC", new DynamicParameters());
+                output = cnn.Query<BankAccountModel>($"SELECT balance, name FROM bank_account WHERE id = '{toAccountID}' ORDER BY name ASC, balance ASC", new DynamicParameters());
                 tempList = output.ToList();
+                toAccountName = tempList[0].name;
                 toBalance = Convert.ToDecimal(tempList[0].balance);
             }
 
@@ -192,7 +198,8 @@ namespace Bank
                 cnn.Query<BankAccountModel>($"UPDATE bank_account SET balance = '{toBalance}' WHERE id='{toAccountID}'", new DynamicParameters());
             }
 
-            Console.WriteLine($"Nytt saldo: (från) {fromBalance} och  (till) {toBalance}");
+            Console.WriteLine($"{amount}kr har förts över mellan [{fromAccountName}] till [{toAccountName}]");
+            
             Console.ReadKey();
         }
         public static void CreateUserAcc(BankAccountModel Account)

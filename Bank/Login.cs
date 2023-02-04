@@ -18,6 +18,7 @@ namespace Bank
             bool login = true;
             while(login)
             {
+ 
                 switch (LoginMenu.UseMenu())
                 {
                     case 0:
@@ -25,7 +26,16 @@ namespace Bank
                         GetUserEmail();
                         break;
                     case 1:
+                        
                         login = GetUserPincode();
+
+                        //If user should be locked out from bank
+                        bool attemptsLeft = CheckAttemtps();
+                        if (!attemptsLeft)
+                        {
+                            return false;
+                        }
+                        
                         break;
                     case 2:
                         return false;
@@ -33,6 +43,21 @@ namespace Bank
             }
             return true;
         }
+
+        static bool CheckAttemtps()
+        {
+                       
+            if(Person.attempts == 3)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+
+        }
+
         // Prompts the user to enter their email, then validates it
         private void GetUserEmail()
         {
@@ -46,6 +71,7 @@ namespace Bank
         // Prompts the user to enter their pincode, then validates it
         private bool GetUserPincode()
         {
+            
             bool pinCheck = true;
             while (pinCheck)
             {
@@ -57,6 +83,18 @@ namespace Bank
             //If they are correct, gets the ID and allows the user to log in
             if (string.IsNullOrWhiteSpace(Person.Email) || !DataAccess.CheckUserInfo(Person.Email, Person.PinCode))
             {
+                //Check number of login attempts. 
+                Person.attempts++;
+                bool attemptsLeft = CheckAttemtps();
+                if (!attemptsLeft)
+                {
+                    Console.GetCursorPosition();
+                    Console.WriteLine("För många misslyckade försök, du kommer låsas ut från banken.");
+                    Console.ReadLine();
+                    return false;
+                }
+
+                
                 Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
                 Console.ReadKey();
             }

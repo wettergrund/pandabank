@@ -148,6 +148,27 @@ namespace Bank
                     UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{from_account}';
                     UPDATE bank_account SET balance=balance + '{amount}' WHERE id='{to_account}';
                     INSERT INTO bank_transaction (name, from_account_id, to_account_id) VALUES ('Överföring - {amount}', '{from_account}', '{to_account}');");
+
+                var transactionOutput = cnn.Query($@"
+                    SELECT
+                        u.first_name as Från_användare,
+                        b.name as Från_kontot,
+                        r.first_name as Till_användare,
+                        TO_CHAR(t.timestamp, 'HH24:MI:SS') as Tid_på_överföringen
+                    FROM
+                        bank_account b
+                        JOIN bank_transaction t ON b.id = '{from_account}'
+                        JOIN bank_account c ON c.id = '{to_account}'
+                        JOIN bank_user u ON u.id = b.user_id
+                        JOIN bank_user r ON r.id = c.user_id
+                    ORDER BY t.timestamp DESC");
+                Console.Clear();
+                Console.WriteLine($"Summa: {amount} SEK");
+                foreach (KeyValuePair<string, object> kvp in transactionOutput.ElementAt(0))
+                {
+                    Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " +  kvp.Value);
+                }
+                Console.ReadKey();
             }
         }
         public static bool AdminAccess()

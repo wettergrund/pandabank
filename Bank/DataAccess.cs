@@ -273,6 +273,7 @@ namespace Bank
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
+                cnn.Execute($"DELETE FROM bank_transaction WHERE from_account_id='{delAccount}' OR to_account_id='{delAccount}'");
                 cnn.Execute($"DELETE FROM bank_account WHERE id='{delAccount}'");
             }
         }

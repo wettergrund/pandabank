@@ -109,14 +109,14 @@ namespace Bank
                         Console.ResetColor();
                         //return false;
                     }
-                   
-                }
-                else
-                {
+                    else
+                    {
                         Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
                         Console.ReadKey();
 
+                    }
                 }
+                
 
             }
             else

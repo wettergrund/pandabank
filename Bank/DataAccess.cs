@@ -245,15 +245,15 @@ WHERE bank_account.user_id={userID};");
             {
                 cnn.Execute($@"
                 UPDATE bank_user
-                SET attempts = CASE
-                    WHEN attempts > 0 THEN attempts - 1
+                SET attempts_left = CASE
+                    WHEN attempts_left > 0 THEN attempts_left - 1
                     ELSE 0
                 END
                 WHERE (email = '{Person.Email}');
 
                 UPDATE bank_user
-                SET locked = CASE
-                    WHEN attempts = 0 THEN true
+                SET is_locked = CASE
+                    WHEN attempts_left = 0 THEN true
                     else false
                 END
                 WHERE (email = '{Person.Email}');
@@ -267,7 +267,7 @@ WHERE bank_account.user_id={userID};");
             {
                 cnn.Execute($@"
                 UPDATE bank_user
-                SET attempts = 3
+                SET attempts_left = 3
                 WHERE (email = '{Person.Email}');
                 ");
             }
@@ -278,10 +278,10 @@ WHERE bank_account.user_id={userID};");
             bool result;
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT locked FROM bank_user WHERE email = '{Person.Email}'", new DynamicParameters());
+                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT is_locked FROM bank_user WHERE email = '{Person.Email}'", new DynamicParameters());
                 try
                 {
-                    result = Convert.ToBoolean(output[0].locked);
+                    result = Convert.ToBoolean(output[0].is_locked);
                 }
                 catch
                 {

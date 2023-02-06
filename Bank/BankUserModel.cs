@@ -29,7 +29,7 @@ namespace Bank
         public bool is_admin { get; set; }
 
         public bool is_client { get; set; }
-        public bool locked { get; set; }
+        public bool is_locked { get; set; }
 
 
         public List<BankAccountModel> accounts { get; set; }

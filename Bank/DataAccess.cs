@@ -32,6 +32,26 @@ namespace Bank
 
             }
         }
+
+        public static List<BankUserModel> GetLockedUsers()
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, id FROM bank_user WHERE is_locked = true", new DynamicParameters());
+                return output.ToList();
+
+            }
+        }
+
+        public static void UnlockUser(int unlockID)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Query<BankAccountModel>($"UPDATE bank_user SET is_locked = false WHERE id= '{unlockID}'", new DynamicParameters());
+                cnn.Query<BankAccountModel>($"UPDATE bank_user SET attempts_left = 3 WHERE id= '{unlockID}'", new DynamicParameters());
+            }
+        }
+
         public static List<BankAccountModel> GetTransferAccountData(int user_id, int accountID)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))

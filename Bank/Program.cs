@@ -8,10 +8,10 @@ namespace Bank
     {
         static void Main(string[] args)
         {
-           
-           
+
+            AdminMenu();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-            ShowMenu();
+            //ShowMenu();
         }
         // Shows a main menu to the user with options to login, or to exit the program
         private static void ShowMenu()
@@ -214,7 +214,7 @@ namespace Bank
 
         static void AdminMenu()
         {
-            Menu CreateAcoountMenu = new Menu(new string[] { "Skapa användare", "Gå tillbaka" });
+            Menu CreateAcoountMenu = new Menu(new string[] { "Skapa användare","Lås upp användare", "Gå tillbaka" });
             bool showMenu = true;
             while (showMenu)
             {
@@ -273,11 +273,22 @@ namespace Bank
 
                         break;
                     case 1:
+                        Menu LockedUsers = new Menu();
+                        int userID = LockedUsers.CreateLockedMenu();
+                        LockedUsers.UseMenu();
+
+                        DataAccess.UnlockUser(userID);
+
+                        Console.WriteLine(userID);
+                        
+                        Console.ReadLine();
+                        break;
+                    case 2:
                         Console.WriteLine("Gå tillbaka");
                         showMenu = false;
                         break;
-                    case 2:
-                        break;
+
+                    
                 }
             }
 

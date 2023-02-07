@@ -1,5 +1,4 @@
-﻿using DatabaseTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -113,7 +112,6 @@ namespace Bank
             bool showMenu = true;
             while (showMenu)
             {
-
                 switch (CreateAccountMenu.UseMenu())
                 {
                     case 0:
@@ -173,8 +171,9 @@ namespace Bank
         {
             BankAccountModel newAccount = new BankAccountModel();
             Console.Write("Kontonamn: ");
+            string currencyName = "SEK;";
             string accountName = Console.ReadLine();
-            if (!Regex.IsMatch(accountName, @"^[a-zA-Z]+$"))
+            if (!Regex.IsMatch(accountName, @"^[a-öA-Ö]+$"))
             {
                 Console.WriteLine("Du kan bara skapa konton med bokstäver");
                 Console.ReadKey();
@@ -185,6 +184,12 @@ namespace Bank
                 bool success = true;
                 do
                 {
+                    newAccount.interest_rate = AccountType();
+                    newAccount.currency_id = CurrencyType();
+                    if(newAccount.currency_id == 2)
+                    {
+                        currencyName = "USD";
+                    }
                     Console.WriteLine("Hur mycket pengar vill du sätta in?");
                     Console.Write(accountName + ": ");
 
@@ -214,14 +219,47 @@ namespace Bank
                         else
                         {
                             newAccount.balance = accValue;
-                            Console.WriteLine(newAccount.name + newAccount.balance);
-                            Console.ReadKey();
                             DataAccess.CreateUserAcc(newAccount);
+                            Console.WriteLine($"Du har nu skapat kontot: {newAccount.name} med räntan: {newAccount.interest_rate}");
+                            Console.WriteLine($"Nuvarande saldo på kontot är: {newAccount.balance} {currencyName}");
+                            Console.ReadKey();
                             success = true;
                         }
                     }
                 }
                 while (!success);
+            }
+        }
+
+        private double AccountType()
+        {
+            Menu AccountTypeMenu = new Menu(new string[] {"Personkonto - 0% Ränta", "Sparkonto - 1.25% Ränta","Pensionsfond - 4% Ränta"});
+            AccountTypeMenu.Output = "Välj typ av konto: ";
+            switch(AccountTypeMenu.UseMenu())
+            {
+                case 0:
+                    return 0;
+                case 1:
+                    return 1.25;
+                case 2:
+                    return 4;
+                default:
+                    return 0;
+            }
+        }
+
+        private int CurrencyType()
+        {
+            Menu CurrencyTypeMenu = new Menu(new string[] { "SEK", "USD" });
+            CurrencyTypeMenu.Output = "Välj valuta: ";
+            switch (CurrencyTypeMenu.UseMenu())
+            {
+                case 0:
+                    return 1; // SEK
+                case 1:
+                    return 2; // USD
+                default:
+                    return 1;
             }
         }
 

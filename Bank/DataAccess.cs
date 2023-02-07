@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using DatabaseTesting;
 using Npgsql;
 using System;
 using System.Collections.Generic;
@@ -275,7 +274,7 @@ namespace Bank
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{Person.id}',1, @balance )", Account);
+                cnn.Execute($"INSERT INTO bank_account (name, interest_rate, user_id, currency_id, balance ) VALUES (@name, @interest_rate, '{Person.id}',@currency_id, @balance )", Account);
             }
         }
         public static void CreateUserAcc(BankAccountModel Account, int userId)

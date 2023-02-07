@@ -1,5 +1,4 @@
-﻿using DatabaseTesting;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Bank

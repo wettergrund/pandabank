@@ -16,7 +16,7 @@ namespace Bank
         {
             ResetLoginData();
             bool login = true;
-            while(login)
+            while (login)
             {
  
                 switch (LoginMenu.UseMenu())
@@ -32,7 +32,7 @@ namespace Bank
                         break;
                     case 2:
                         return false;
-                } 
+                }
             }
             return true;
         }
@@ -47,7 +47,7 @@ namespace Bank
                 isEmail = ValidateEmail(Console.ReadLine());
             }
         }
-        // Prompts the user to enter their pincode, then validates it
+        // Prompts the user to enter their pincode and checks if its valid
         private bool GetUserPincode()
         {
             
@@ -55,7 +55,9 @@ namespace Bank
             while (pinCheck)
             {
                 LoginMenu.MoveCursorRight();
-                pinCheck = ValidatePincode(MaskPincodeData());
+                //Checks if password only contains integers and masks the pincode output in the console
+                pinCheck = ValidatePincode(Helper.MaskPincodeData());
+                ResetRow("Pinkod:");
                 LoginMenu.MoveCursorBottom();
             }
 
@@ -94,33 +96,6 @@ namespace Bank
             return true;
         }
 
-        private string MaskPincodeData()
-        {
-            string pin = "";
-            ConsoleKeyInfo keyInput;
-
-            do
-            {
-                keyInput = Console.ReadKey(true);
-
-                if (keyInput.Key != ConsoleKey.Backspace && keyInput.Key != ConsoleKey.Enter)
-                {
-                    pin += keyInput.KeyChar;
-                    Console.Write("*");
-                }
-                else
-                {
-                    if (keyInput.Key == ConsoleKey.Backspace && pin.Length > 0)
-                    {
-                        pin = pin.Substring(0, (pin.Length - 1));
-                        Console.Write("\b \b");
-                    }
-                }
-            }
-            while (keyInput.Key != ConsoleKey.Enter); // Exits the loop when Enter is pressed
-            return pin;
-        }
-
         //Resets the stored email/pincode for Person.cs
         //Also resets the menu prints to remove the previously stored email
         private void ResetLoginData()
@@ -129,6 +104,12 @@ namespace Bank
             Person.PinCode = "";
             LoginMenu.SetMenuItem("Email:", 0);
             LoginMenu.SelectIndex = 0;
+            LoginMenu.PrintSystem();
+        }
+
+        private void ResetRow(string row)
+        {
+            LoginMenu.SetMenuItem(row, LoginMenu.SelectIndex);
             LoginMenu.PrintSystem();
         }
 
@@ -148,7 +129,7 @@ namespace Bank
         // Checks if email only has allowed characters (Alphabetic letters, numbers and underscore)
         private bool ValidateEmail(string email)
         {
-            if(Regex.IsMatch(email, @"^[a-zA-Z0-9_@.]+$"))
+            if (Regex.IsMatch(email, @"^[a-zA-Z0-9_@.]+$"))
             {
                 Person.Email = Helper.FormatString(email);
                 LoginMenu.SetMenuItem("Email:" + Person.Email, 0);
@@ -163,7 +144,7 @@ namespace Bank
         private bool ValidatePincode(string pincode)
         {
             bool success = int.TryParse(pincode, out int result);
-            if(success && pincode.Length <= 4)
+            if (success && pincode.Length <= 4)
             {
                 Person.PinCode = result.ToString();
                 return false;

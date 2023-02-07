@@ -32,15 +32,15 @@ namespace Bank
                         break;
                     case 2:
                         ResetRow("Summa:");
-                        AmountToTransfer();
+                        GetAmountToTransfer();
                         break;
                     case 3:
-                        BeginTransaction();
+                        Transaction();
                         break;
                     case 4:
                         isTransfering = false;
                         break;
-                }          
+                }
             }
         }
 
@@ -77,7 +77,7 @@ namespace Bank
         }
         // Prompts user to enter the amount,
         // then checks if their chosen account has enough funds to cover the transaction
-        private void AmountToTransfer()
+        private void GetAmountToTransfer()
         {
             TransferMenu.MoveCursorRight();
             string answer = Console.ReadLine();
@@ -97,7 +97,7 @@ namespace Bank
             }
         }
         // If all data input is valid, the transaction will go through
-        private void BeginTransaction()
+        private void Transaction()
         {
             if (amount > 0 && !string.IsNullOrWhiteSpace(toEmail) && fromID > -1)
             {

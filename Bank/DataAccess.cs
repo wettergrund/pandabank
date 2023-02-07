@@ -29,7 +29,6 @@ namespace Bank
             {
                 var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, pin_code , role_id , branch_id FROM bank_user WHERE id = '{user_id}'", new DynamicParameters());
                 return output.ToList();
-
             }
         }
         public static List<BankAccountModel> GetTransferAccountData(int user_id, int accountID)
@@ -103,9 +102,6 @@ namespace Bank
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 cnn.Query($"INSERT INTO bank_user (first_name, last_name, pin_code, role_id, branch_id, email) VALUES ('{user.first_name}','{user.last_name}','{user.pin_code}','{user.role_id}','{user.branch_id}','{user.email}')", new DynamicParameters());
-
-
-
             }
             BankAccountModel newAcc = new BankAccountModel();
             newAcc.name = "Personkonto";
@@ -113,7 +109,6 @@ namespace Bank
 
             int userId = GetUserID(user.email, user.pin_code);
             CreateUserAcc(newAcc, userId);
-
         }
         public static int GetUserID(string email)
         {
@@ -147,12 +142,13 @@ namespace Bank
                 var output = cnn.Query($@"
                     UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{from_account}';
                     UPDATE bank_account SET balance=balance + '{amount}' WHERE id='{to_account}';
-                    INSERT INTO bank_transaction (name, from_account_id, to_account_id) VALUES ('Överföring - {amount}', '{from_account}', '{to_account}');");
+                    INSERT INTO bank_transaction (name, amount, from_account_id, to_account_id) VALUES ('Överföring', '{amount}','{from_account}', '{to_account}');");
 
                 var transactionOutput = cnn.Query($@"
                     SELECT
                         u.first_name as Från_användare,
                         b.name as Från_kontot,
+                        t.amount as Summa,
                         r.first_name as Till_användare,
                         TO_CHAR(t.timestamp, 'HH24:MI:SS') as Tid_på_överföringen
                     FROM
@@ -178,13 +174,10 @@ namespace Bank
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT * FROM bank_user u INNER JOIN bank_role r ON u.role_id = r.id WHERE u.id = '{Person.id}'", new DynamicParameters());
-
                 isAdmin = output[0].is_admin;
-
             }
             return isAdmin;
         }
-
 
         public static void UpdateBalance(int fromAccountID, int toAccountID)
         {
@@ -199,7 +192,6 @@ namespace Bank
 
                 enteredValue = enteredValue.Replace(",", ".");
                 var countPennies = enteredValue.Split('.');
-
 
                 successfulInput = decimal.TryParse(enteredValue, out amount);
 
@@ -219,13 +211,10 @@ namespace Bank
             }
             while (!successfulInput);
 
-
             decimal fromBalance;
             string fromAccountName;
-
             decimal toBalance;
             string toAccountName;
-
 
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
@@ -256,8 +245,7 @@ namespace Bank
                 cnn.Query<BankAccountModel>($"UPDATE bank_account SET balance = '{toBalance}' WHERE id='{toAccountID}'", new DynamicParameters());
             }
 
-            Console.WriteLine($"{amount}kr har förts över mellan [{fromAccountName}] till [{toAccountName}]");
-            
+            Console.WriteLine($"{amount}kr har förts över mellan [{fromAccountName}] till [{toAccountName}]");     
             Console.ReadKey();
         }
         public static void CreateUserAcc(BankAccountModel Account)
@@ -272,7 +260,6 @@ namespace Bank
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{userId}',1, @balance )", Account);
-
             }
         }
 
@@ -291,12 +278,9 @@ namespace Bank
                 var output = cnn.Query<BankAccountModel>(@$"SELECT  bank_account.id,bank_account.user_id, bank_account.name AS account_name, balance, bank_currency.name AS currency_name, bank_currency.exchange_rate AS test,CAST(balance*bank_currency.exchange_rate AS decimal(10,2)) AS SEK FROM  bank_account JOIN bank_currency ON bank_account.currency_id = bank_currency.id 
 WHERE bank_account.user_id={userID};");
 
-                return output.ToList();
-
-             
+                return output.ToList();             
             }
         }
-
 
         private static string LoadConnectionString(string id = "Default")
         {

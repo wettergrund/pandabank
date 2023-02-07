@@ -11,7 +11,6 @@ namespace Bank
     {
         internal static int FromID()
         {
-
             /* Return DB ID of the selected account.  */
             Menu fromAccountMenu = new Menu();
             List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu(Person.id);

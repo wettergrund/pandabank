@@ -45,8 +45,7 @@ namespace Bank
         }
 
         static bool CheckAttemtps()
-        {
-                       
+        {                     
             if(Person.attempts == 3)
             {
                 return false;

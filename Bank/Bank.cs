@@ -42,8 +42,15 @@ namespace Bank
         private void ShowUserMenu()
         {
             Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto","Se historik", "Logga ut" });
-            UserTransfers TransferToUser = new UserTransfers();
+            
+            // Menu for admin user
             bool isAdmin = DataAccess.AdminAccess();
+            if (isAdmin)
+            {
+                UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto","Se historik", "Logga ut", "Admin" });
+            }
+            
+            UserTransfers TransferToUser = new UserTransfers();
             bool showMenu = true;
 
             while (showMenu)
@@ -70,6 +77,9 @@ namespace Bank
                         break;
                     case 6:
                         showMenu = false;
+                        break;
+                    case 7:
+                        AdminMenu();
                         break;
                 }
             }

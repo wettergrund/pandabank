@@ -9,6 +9,7 @@ namespace Bank
         {   
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             Bank bank = new Bank();
+            bank.AdminMenu();
             bank.ShowMenu();
         }       
     }

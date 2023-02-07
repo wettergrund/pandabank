@@ -166,6 +166,10 @@ namespace Bank
         {
             // Gets the account data into a list for the currently logged on user
             List<BankUserModel> currentUser = DataAccess.GetLockedUsers();
+            if(currentUser.Count == 0)
+            {
+                return -1;
+            }
             string[] accountMenuItems = new string[currentUser.Count + 1];
             //Fills the menuArray with current users account name, and balance - And adds a Go back option at the end
             for (int i = 0; i < currentUser.Count + 1; i++)
@@ -180,6 +184,7 @@ namespace Bank
                 }
             }
             MenuItems = accountMenuItems;
+
             return currentUser[0].id;
         }
         // Creates a menuarray that shows the accounts name and balance - Then sets that as the current menu

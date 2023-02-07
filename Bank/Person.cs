@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DatabaseTesting
+namespace Bank
 {
     public static class Person
     {

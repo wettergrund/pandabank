@@ -23,6 +23,29 @@ namespace Bank
                 return output.ToList();
             }
         }
+        public static List<BankTransaction> GetTransactions(int user_id)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankTransaction>($@"SELECT 
+                    t.name,
+                    t.amount,
+                    a.name as from_account_name,
+                    u.first_name,
+                    c.name as to_account_name,
+                    r.first_name,
+                    t.timestamp
+                    FROM
+                    bank_account a
+                    JOIN bank_user u ON u.id = a.user_id
+                    JOIN bank_transaction t ON a.id = t.from_account_id
+                    JOIN bank_account c ON c.id = t.to_account_id
+                    JOIN bank_user r ON r.id = c.user_id
+                    WHERE
+                    u.id = {user_id};", new DynamicParameters());
+                return output.ToList();
+            }
+        }
         public static List<BankUserModel> GetUserData(int user_id)
         {
             using(IDbConnection cnn =new NpgsqlConnection(LoadConnectionString()))
@@ -282,7 +305,7 @@ WHERE bank_account.user_id={userID};");
             }
         }
 
-        private static string LoadConnectionString(string id = "Default")
+        private static string LoadConnectionString(string id = "myDB")
         {
             return ConfigurationManager.ConnectionStrings[id].ConnectionString;
         }

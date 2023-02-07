@@ -1,4 +1,5 @@
 ﻿using DatabaseTesting;
+using NpgsqlTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace Bank
         // Checking balance to their accounts, transfers between their own accounts and logging out.
         private void ShowUserMenu()
         {
-            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto", "Logga ut" });
+            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare","Sätt in pengar på ett konto", "Skapa ett nytt konto", "Ta bort ett konto", "Logga ut" });
             UserTransfers TransferToUser = new UserTransfers();
             bool isAdmin = DataAccess.AdminAccess();
             bool showMenu = true;
@@ -61,12 +62,15 @@ namespace Bank
                         TransferToUser.Transfer();
                         break;
                     case 3:
-                        CreateAccount();
+                        DepositMoney();
                         break;
                     case 4:
-                        DeleteAccount();
+                        CreateAccount();                    
                         break;
                     case 5:
+                        DeleteAccount();
+                        break;
+                        case 6:
                         showMenu = false;
                         break;
                 }
@@ -256,11 +260,74 @@ namespace Bank
                     }
                     else
                     {
-                        Console.WriteLine("Fel pinkod skriv rätt hallå");
+                        Console.WriteLine("Fel pinkod , försök igen.");
                         Console.ReadKey();
 
                     }
                 }
+            }
+        }
+        public void DepositMoney()
+        {
+            //Fixa så menu val ligger brevid varanda ?
+            Menu depositMenu = new Menu();
+            List<BankAccountModel> accounts = depositMenu.CreateTransferMenu(Person.id);
+            int selectedAccount;
+            decimal depositMoney = 0;
+            while (true)
+            {
+                depositMenu.Output = "Välj konto.";
+                selectedAccount = depositMenu.UseMenu();
+                if (selectedAccount == depositMenu.GetMenu().Length - 1)
+                {
+                    break;
+                }
+                Menu amountChoice = new Menu(new string[] { "100:-", "200:-", "500:-", "1000:-","Ange egen summa." });
+                bool showMenu = true;
+                while(showMenu)
+                {
+
+                    //Sicka in ID accounts[selectedaccount].id , Gör data access , sicka in id updatera balance med userInput DataAccess.UpdateDeposit(accounts[SA].id,userInput)
+
+                    switch (amountChoice.UseMenu())
+                    {
+
+                        case 0:
+                            depositMoney = 100;
+                            break;
+                        case 1:
+                            depositMoney = 200;
+                            break;
+                        case 2:
+                            depositMoney = 500;
+                            break;
+                        case 3:
+                            depositMoney = 1000;
+                            break;
+                        case 4:
+                            decimal userInput;
+                            Console.WriteLine("Ange hur mycket du vill du vill sätta in?");
+                            decimal.TryParse(Console.ReadLine(), out userInput);
+                            if(userInput > 0)
+                            {
+                                depositMoney = userInput;
+                                Console.WriteLine("Du har satt in:" + userInput + " på konto [" + accounts[selectedAccount].name + "]");
+                                Console.ReadKey();
+                            }
+                            else 
+                            {
+                                Console.WriteLine("Ogiltigt belopp");
+                                Console.ReadKey();
+                            }                        
+                            break;
+                        case 5:
+                            break;
+                    }
+
+                        
+
+                }
+      
             }
         }
     }

@@ -42,7 +42,7 @@ namespace Bank
         // Checking balance to their accounts, transfers between their own accounts and logging out.
         private void ShowUserMenu()
         {
-            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto", "Logga ut" });
+            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto","Se historik", "Logga ut" });
             UserTransfers TransferToUser = new UserTransfers();
             bool isAdmin = DataAccess.AdminAccess();
             bool showMenu = true;
@@ -67,6 +67,9 @@ namespace Bank
                         DeleteAccount();
                         break;
                     case 5:
+                        PrintTransaction(Person.id);
+                        break;
+                    case 6:
                         showMenu = false;
                         break;
                 }
@@ -262,6 +265,20 @@ namespace Bank
                     }
                 }
             }
+        }
+
+        public static void PrintTransaction(int userID)
+        {
+            Menu transMenu = new Menu();
+            List<BankTransaction> userTrans = DataAccess.GetTransactions(userID);
+            for (int i = 0; i < userTrans.Count; i++)
+            {
+                Console.WriteLine("-------------------------");
+                Console.WriteLine("Namn:" + userTrans[i].name + " Summa:" + userTrans[i].amount + "\nFrån: " + userTrans[i].from_account_name + "\nTill: " + userTrans[i].to_account_name + "\nKlockslag: " + userTrans[i].timestamp);
+                Console.WriteLine("-------------------------");
+            }
+            Console.ReadKey();
+
         }
     }
 }

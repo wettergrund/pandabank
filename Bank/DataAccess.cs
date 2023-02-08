@@ -263,6 +263,15 @@ namespace Bank
             }
         }
 
+        public static void DepositAcc(int selectedAcc, decimal amount)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"UPDATE bank_account SET balance=balance + '{amount}' WHERE id='{selectedAcc}'");
+
+            }
+        }
+
         public static void DeleteUserAcc(int delAccount)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))

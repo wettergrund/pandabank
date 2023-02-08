@@ -242,7 +242,7 @@ namespace Bank
                 }
                 else if (accounts[selectedAccount].balance > 0)
                 {
-                    Console.WriteLine("Du har pengar kvar på detta konto, sicka över pengarna till ett annat för att radera.");
+                    Console.WriteLine("Kontot är inte tomt,det måste vara tomt för att fortsätta");
                     Console.ReadKey();
                     break;
                 }
@@ -274,19 +274,11 @@ namespace Bank
             List<BankAccountModel> accounts = depositMenu.CreateTransferMenu(Person.id);
             int selectedAccount;
             decimal depositMoney = 0;
-            while (true)
-            {
-                depositMenu.Output = "Välj konto.";
-                selectedAccount = depositMenu.UseMenu();
-                if (selectedAccount == depositMenu.GetMenu().Length - 1)
-                {
-                    break;
-                }
-                Menu amountChoice = new Menu(new string[] { "100:-", "200:-", "500:-", "1000:-","Ange egen summa." });
-                bool showMenu = true;
-                while(showMenu)
-                {
 
+                depositMenu.Output = "Välj konto.";
+                selectedAccount = depositMenu.UseMenu();    
+                Menu amountChoice = new Menu(new string[] { "100:-", "200:-", "500:-", "1000:-","Ange egen summa." });
+             
                     //Sicka in ID accounts[selectedaccount].id , Gör data access , sicka in id updatera balance med userInput DataAccess.UpdateDeposit(accounts[SA].id,userInput)
 
                     switch (amountChoice.UseMenu())
@@ -294,15 +286,19 @@ namespace Bank
 
                         case 0:
                             depositMoney = 100;
+                            DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
                             break;
                         case 1:
                             depositMoney = 200;
+                            DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
                             break;
                         case 2:
                             depositMoney = 500;
+                            DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
                             break;
                         case 3:
                             depositMoney = 1000;
+                            DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
                             break;
                         case 4:
                             decimal userInput;
@@ -311,8 +307,9 @@ namespace Bank
                             if(userInput > 0)
                             {
                                 depositMoney = userInput;
-                                Console.WriteLine("Du har satt in:" + userInput + " på konto [" + accounts[selectedAccount].name + "]");
+                                Console.WriteLine("Du har satt in " + userInput + ":- på konto [" + accounts[selectedAccount].name + "]");
                                 Console.ReadKey();
+                                DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
                             }
                             else 
                             {
@@ -326,9 +323,8 @@ namespace Bank
 
                         
 
-                }
+                
       
-            }
         }
     }
 }

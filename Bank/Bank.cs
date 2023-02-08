@@ -42,8 +42,15 @@ namespace Bank
         private void ShowUserMenu()
         {
             Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto","Se historik", "Logga ut" });
-            UserTransfers TransferToUser = new UserTransfers();
+            
+            // Menu for admin user
             bool isAdmin = DataAccess.AdminAccess();
+            if (isAdmin)
+            {
+                UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto","Se historik", "Logga ut", "Admin" });
+            }
+            
+            UserTransfers TransferToUser = new UserTransfers();
             bool showMenu = true;
 
             while (showMenu)
@@ -70,6 +77,9 @@ namespace Bank
                         break;
                     case 6:
                         showMenu = false;
+                        break;
+                    case 7:
+                        AdminMenu();
                         break;
                 }
             }
@@ -106,13 +116,14 @@ namespace Bank
             }
         }
 
-        private void AdminMenu()
+        public void AdminMenu()
         {
-            Menu CreateAccountMenu = new Menu(new string[] { "Skapa användare", "Gå tillbaka" });
+            Menu CreateAcoountMenu = new Menu(new string[] { "Skapa användare", "Lås upp användare", "Gå tillbaka" });
             bool showMenu = true;
             while (showMenu)
             {
-                switch (CreateAccountMenu.UseMenu())
+
+                switch (CreateAcoountMenu.UseMenu())
                 {
                     case 0:
                         // Get model of new user
@@ -140,6 +151,7 @@ namespace Bank
 
                             Console.Write($"Ange mail: ");
                             newUser.email = Console.ReadLine();
+
                             // Error handling for incorrect email.
                             isValidEmail = regex.IsMatch(newUser.email);
                             if (!isValidEmail)
@@ -149,22 +161,47 @@ namespace Bank
                             }
                         }
                         while (!isValidEmail);
+
                         newUser.branch_id = 3;
+
                         //Generate pin for user
                         Random random = new Random();
                         newUser.pin_code = Convert.ToString(random.Next(1000, 9999));
+
                         DataAccess.CreateUser(newUser);
                         Console.WriteLine($"\nAnvändare har skapats\nMail: {newUser.email}\nNamn: {newUser.first_name} {newUser.last_name}\nPinkod: {newUser.pin_code} ");
+
+
                         Console.ReadLine();
+
+
                         break;
                     case 1:
+                        Menu LockedUsers = new Menu();
+                        int userID = LockedUsers.CreateLockedMenu();
+                        if(userID == -1)
+                        {
+                            Console.WriteLine("Ingen användare är låst");
+                            Console.ReadLine();
+                            break;
+                        }
+                        LockedUsers.UseMenu();
+
+                        DataAccess.UnlockUser(userID);
+
+                        Console.WriteLine(userID);
+
+                        Console.ReadLine();
+                        break;
+                    case 2:
                         Console.WriteLine("Gå tillbaka");
                         showMenu = false;
                         break;
-                    case 2:
-                        break;
+
+
                 }
             }
+
         }
         //Method to creat a savings account
         private void CreateAccount()

@@ -53,6 +53,26 @@ namespace Bank
                 return output.ToList();
             }
         }
+
+        public static List<BankUserModel> GetLockedUsers()
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, id FROM bank_user WHERE is_locked = true", new DynamicParameters());
+                return output.ToList();
+
+            }
+        }
+
+        public static void UnlockUser(int unlockID)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Query<BankAccountModel>($"UPDATE bank_user SET is_locked = false WHERE id= '{unlockID}'", new DynamicParameters());
+                cnn.Query<BankAccountModel>($"UPDATE bank_user SET attempts_left = 3 WHERE id= '{unlockID}'", new DynamicParameters());
+            }
+        }
+
         public static List<BankAccountModel> GetTransferAccountData(int user_id, int accountID)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
@@ -195,7 +215,8 @@ namespace Bank
             bool isAdmin;
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT * FROM bank_user u INNER JOIN bank_role r ON u.role_id = r.id WHERE u.id = '{Person.id}'", new DynamicParameters());
+                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT * FROM bank_user u INNER JOIN bank_role r ON u.role_id = r.id WHERE u.email = '{Person.Email}'", new DynamicParameters());
+
                 isAdmin = output[0].is_admin;
             }
             return isAdmin;
@@ -300,14 +321,73 @@ namespace Bank
                 var output = cnn.Query<BankAccountModel>(@$"SELECT  bank_account.id,bank_account.user_id, bank_account.name AS account_name, balance, bank_currency.name AS currency_name, bank_currency.exchange_rate AS test,CAST(balance*bank_currency.exchange_rate AS decimal(10,2)) AS SEK FROM  bank_account JOIN bank_currency ON bank_account.currency_id = bank_currency.id 
 WHERE bank_account.user_id={userID};");
 
-                return output.ToList();             
+                return output.ToList();
+
+             
             }
         }
+
+
+        public static void LoginAttempt()
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($@"
+                UPDATE bank_user
+                SET attempts_left = CASE
+                    WHEN attempts_left > 0 THEN attempts_left - 1
+                    ELSE 0
+                END
+                WHERE (email = '{Person.Email}');
+
+                UPDATE bank_user
+                SET is_locked = CASE
+                    WHEN attempts_left = 0 THEN true
+                    else false
+                END
+                WHERE (email = '{Person.Email}');
+                ");
+            }
+        }
+
+        public static void LoginReset()
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($@"
+                UPDATE bank_user
+                SET attempts_left = 3
+                WHERE (email = '{Person.Email}');
+                ");
+            }
+        }
+
+        public static bool IsLocked()
+        {
+            bool result;
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT is_locked FROM bank_user WHERE email = '{Person.Email}'", new DynamicParameters());
+                try
+                {
+                    result = Convert.ToBoolean(output[0].is_locked);
+                }
+                catch
+                {
+                    result = false;
+                }
+
+            }
+            return result;
+        }
+
 
         private static string LoadConnectionString(string id = "Default")
         {
             return ConfigurationManager.ConnectionStrings[id].ConnectionString;
         }
+
+
 
     }
 }

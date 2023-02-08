@@ -27,13 +27,6 @@ namespace Bank
                     case 1:
                         
                         login = GetUserPincode();
-
-                        //If user should be locked out from bank
-                        bool attemptsLeft = CheckAttemtps();
-                        if (!attemptsLeft)
-                        {
-                            return false;
-                        }
                         
                         break;
                     case 2:
@@ -41,19 +34,6 @@ namespace Bank
                 }
             }
             return true;
-        }
-
-        static bool CheckAttemtps()
-        {                     
-            if(Person.attempts == 3)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-
         }
 
         // Prompts the user to enter their email, then validates it
@@ -79,24 +59,33 @@ namespace Bank
                 ResetRow("Pinkod:");
                 LoginMenu.MoveCursorBottom();
             }
+
             //If email is empty or Email/Pincode combo is wrong, gives the user a warning
             //If they are correct, gets the ID and allows the user to log in
             if (string.IsNullOrWhiteSpace(Person.Email) || !DataAccess.CheckUserInfo(Person.Email, Person.PinCode))
             {
-                //Check number of login attempts. 
-                Person.attempts++;
-                bool attemptsLeft = CheckAttemtps();
-                if (!attemptsLeft)
-                {
-                    Console.GetCursorPosition();
-                    Console.WriteLine("För många misslyckade försök, du kommer låsas ut från banken.");
-                    Console.ReadLine();
-                    return false;
-                }
-
                 
-                Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
-                Console.ReadKey();
+                if (!pinCheck)
+                {
+                    DataAccess.LoginAttempt();
+                    bool isLocked = DataAccess.IsLocked();
+                    if (isLocked)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Konto låst, kontakta banken för att få det upplåst");
+                        Console.ReadLine();
+                        Console.ResetColor();
+                        //return false;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
+                        Console.ReadKey();
+
+                    }
+                }
+                
+
             }
             else
             {
@@ -127,6 +116,8 @@ namespace Bank
         //Resets the menu output and moves the cursor back
         private void Warning(string menuItem, string errorMessage)
         {
+ 
+
             LoginMenu.MoveCursorBottom();
             Console.WriteLine(errorMessage);
             LoginMenu.SetMenuItem(menuItem, LoginMenu.SelectIndex);

@@ -1,11 +1,5 @@
 ﻿using DatabaseTesting;
-using NpgsqlTypes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Bank
 {
@@ -43,7 +37,7 @@ namespace Bank
         // Checking balance to their accounts, transfers between their own accounts and logging out.
         private void ShowUserMenu()
         {
-            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare","Sätt in pengar på ett konto", "Skapa ett nytt konto", "Ta bort ett konto", "Logga ut" });
+            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Sätt in pengar på ett konto", "Skapa ett nytt konto", "Ta bort ett konto", "Ta ut pengar från konto", "Logga ut" });
             UserTransfers TransferToUser = new UserTransfers();
             bool isAdmin = DataAccess.AdminAccess();
             bool showMenu = true;
@@ -65,12 +59,15 @@ namespace Bank
                         DepositMoney();
                         break;
                     case 4:
-                        CreateAccount();                    
+                        CreateAccount();
                         break;
                     case 5:
                         DeleteAccount();
                         break;
-                        case 6:
+                    case 6:
+                        withdrawMoney();
+                        break;
+                    case 7:
                         showMenu = false;
                         break;
                 }
@@ -262,7 +259,6 @@ namespace Bank
                     {
                         Console.WriteLine("Fel pinkod , försök igen.");
                         Console.ReadKey();
-
                     }
                 }
             }
@@ -275,56 +271,81 @@ namespace Bank
             int selectedAccount;
             decimal depositMoney = 0;
 
-                depositMenu.Output = "Välj konto.";
-                selectedAccount = depositMenu.UseMenu();    
-                Menu amountChoice = new Menu(new string[] { "100:-", "200:-", "500:-", "1000:-","Ange egen summa." });
-             
-                    //Sicka in ID accounts[selectedaccount].id , Gör data access , sicka in id updatera balance med userInput DataAccess.UpdateDeposit(accounts[SA].id,userInput)
+            depositMenu.Output = "Välj konto.";
+            selectedAccount = depositMenu.UseMenu();
+            decimal userInput;
+            Console.WriteLine("Ange hur mycket du vill du vill sätta in.");
+            decimal.TryParse(Console.ReadLine(), out userInput);
+            if (userInput > 0)
+            {
+                depositMoney = userInput;
+                Console.WriteLine("Du har satt in " + userInput + ":- på konto [" + accounts[selectedAccount].name + "]");
+                Console.ReadKey();
+                DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
+            }
+            else
+            {
+                Console.WriteLine("Ogiltigt belopp");
+                Console.ReadKey();
+            }
+        }
+        //Connect to same DataAccsess as deposit ? - Leo
+        public void withdrawMoney()
+        {
+            decimal withdrawMoney = 0;
+            Menu withdrawMenu = new Menu();
+            List<BankAccountModel> accounts = withdrawMenu.CreateTransferMenu(Person.id);
+            withdrawMenu.Output = "Välj Konto";
+            int selectedAccount = withdrawMenu.UseMenu();
+            Menu withdrawAmount = new Menu(new string[] { "100:-", "200:-", "500:-", "1000:-", "Ange egen summa." });
+            switch (withdrawAmount.UseMenu())
+            {
 
-                    switch (amountChoice.UseMenu())
+                case 0:
+                    withdrawMoney = 100;
+                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
+                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                    Console.ReadKey();
+                    break;
+                case 1:
+                    withdrawMoney = 200;
+                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
+                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                    Console.ReadKey();
+                    break;
+                case 2:
+                    withdrawMoney = 500;
+                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
+                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                    Console.ReadKey();
+                    break;
+                case 3:
+                    withdrawMoney = 1000;
+                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
+                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                    Console.ReadKey(); break;
+                case 4:
+                    decimal userInput;
+                    Console.WriteLine("Ange hur mycket du vill du vill dra ut.");
+                    decimal.TryParse(Console.ReadLine(), out userInput);
+                    if (userInput > 0)
                     {
-
-                        case 0:
-                            depositMoney = 100;
-                            DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
-                            break;
-                        case 1:
-                            depositMoney = 200;
-                            DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
-                            break;
-                        case 2:
-                            depositMoney = 500;
-                            DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
-                            break;
-                        case 3:
-                            depositMoney = 1000;
-                            DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
-                            break;
-                        case 4:
-                            decimal userInput;
-                            Console.WriteLine("Ange hur mycket du vill du vill sätta in?");
-                            decimal.TryParse(Console.ReadLine(), out userInput);
-                            if(userInput > 0)
-                            {
-                                depositMoney = userInput;
-                                Console.WriteLine("Du har satt in " + userInput + ":- på konto [" + accounts[selectedAccount].name + "]");
-                                Console.ReadKey();
-                                DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
-                            }
-                            else 
-                            {
-                                Console.WriteLine("Ogiltigt belopp");
-                                Console.ReadKey();
-                            }                        
-                            break;
-                        case 5:
-                            break;
+                        withdrawMoney = userInput;
+                        Console.WriteLine("Du tog ut " + userInput + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                        Console.ReadKey();
+                        DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
                     }
+                    else
+                    {
+                        Console.WriteLine("Ogiltigt belopp");
+                        Console.ReadKey();
+                    }
+                    break;
+                case 5:
+                    break;
 
-                        
 
-                
-      
+            }
         }
     }
 }

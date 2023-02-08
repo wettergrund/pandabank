@@ -128,7 +128,7 @@ namespace Bank
                 Console.WriteLine("Dubbelkolla så att all data ovan är ifyllt.");
                 Console.ReadKey();
             }
-            
+
         }
         // Promps the user to enter their pincode, and then checks if is correct
         private bool CheckPincode()
@@ -142,7 +142,7 @@ namespace Bank
                 isValid = ValidatePincode(pin);
             }
             // If pincode is valid and user hasnt exceeded 3 attempts
-            if(isValid && DataAccess.CheckUserInfo(Person.Email, Person.PinCode)) // If pin is correct for the currently logged in user
+            if (isValid && DataAccess.CheckUserInfo(Person.Email, Person.PinCode)) // If pin is correct for the currently logged in user
             {
                 return true;
             }

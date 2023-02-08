@@ -1,4 +1,4 @@
-﻿using DatabaseTesting;
+﻿using Npgsql.Internal.TypeHandlers.NetworkHandlers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -83,7 +83,7 @@ namespace Bank
         // Moves the cursor to the bottom of current menu
         public void MoveCursorBottom()
         {
-            Console.SetCursorPosition(0,menuItems.Length);
+            Console.SetCursorPosition(0, menuItems.Length);
         }
         // Moves the cursor to the top of the current menu
         public void MoveCursorTop()
@@ -96,7 +96,7 @@ namespace Bank
         {
             Console.Clear();
             // Prints out the menu items in the console, and puts brackets around the selected item.
-            if (!String.IsNullOrWhiteSpace(output) )
+            if (!String.IsNullOrWhiteSpace(output))
             {
                 Console.ForegroundColor = color;
                 Console.WriteLine(output);
@@ -114,7 +114,7 @@ namespace Bank
                 else
                 {
                     Console.ResetColor();
-                    Console.WriteLine("{0} {1}",regularChar, menuItems[i]);
+                    Console.WriteLine("{0} {1}", regularChar, menuItems[i]);
                 }
                 Console.ResetColor();
             }
@@ -162,23 +162,49 @@ namespace Bank
             MenuItems = accountMenuItems;
             return currentUser;
         }
+
+        public int CreateLockedMenu()
+        {
+            // Gets the account data into a list for the currently logged on user
+            List<BankUserModel> currentUser = DataAccess.GetLockedUsers();
+            if (currentUser.Count == 0)
+            {
+                return -1;
+            }
+            string[] accountMenuItems = new string[currentUser.Count + 1];
+            //Fills the menuArray with current users account name, and balance - And adds a Go back option at the end
+            for (int i = 0; i < currentUser.Count + 1; i++)
+            {
+                if (i < currentUser.Count)
+                {
+                    accountMenuItems[i] = $"{currentUser[0].first_name} {currentUser[0].last_name}";
+                }
+                else
+                {
+                    accountMenuItems[i] = "Gå tillbaka";
+                }
+            }
+            MenuItems = accountMenuItems;
+
+            return currentUser[0].id;
+        }
         // Creates a menuarray that shows the accounts name and balance - Then sets that as the current menu
         public List<BankAccountModel> CreateTransferMenu(int userID, int selectedItem)
         {
-                List<BankAccountModel> currentUser = DataAccess.GetTransferAccountData(userID, selectedItem);
-                string[] accountMenuItems = new string[currentUser.Count + 1];
+            List<BankAccountModel> currentUser = DataAccess.GetTransferAccountData(userID, selectedItem);
+            string[] accountMenuItems = new string[currentUser.Count + 1];
             //Fills the menuArray with current users account name, and balance - And adds a Go back option at the end
             for (int i = 0; i < currentUser.Count + 1; i++)
+            {
+                if (i < currentUser.Count)
                 {
-                    if (i < currentUser.Count)
-                    {
-                        accountMenuItems[i] = currentUser.ElementAt(i).name + ": " + currentUser.ElementAt(i).balance;
-                    }
-                    else
-                    {
-                        accountMenuItems[i] = "Gå tillbaka";
-                    }
+                    accountMenuItems[i] = currentUser.ElementAt(i).name + ": " + currentUser.ElementAt(i).balance;
                 }
+                else
+                {
+                    accountMenuItems[i] = "Gå tillbaka";
+                }
+            }
             MenuItems = accountMenuItems;
             return currentUser;
         }

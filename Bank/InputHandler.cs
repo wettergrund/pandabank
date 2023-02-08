@@ -36,7 +36,7 @@ namespace Bank
             {
                 keyPressed = Console.ReadKey(true).Key;
                 // If a matching letter is found, sets that as the index
-                if((index = CheckLetter(input, position, keyPressed)) >= 0)
+                if ((index = CheckLetter(input, position, keyPressed)) >= 0)
                 {
                     return keyPressed;
                 }
@@ -49,11 +49,11 @@ namespace Bank
         {
             int num = -1;
             // Loops through the array
-            for(int i = 0; i < input.Length; i++)
+            for (int i = 0; i < input.Length; i++)
             {
                 // Also checks so that we are not already at currently selected index, also checks the first letter on each row for a match to user input 
                 // If found, stores the row value
-                if (input[i].Substring(0,1).ToUpper() == key.ToString().ToUpper() && i != position)
+                if (input[i].Substring(0, 1).ToUpper() == key.ToString().ToUpper() && i != position)
                 {
                     num = i;
                     break;

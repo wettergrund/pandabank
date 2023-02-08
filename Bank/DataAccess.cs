@@ -23,14 +23,57 @@ namespace Bank
                 return output.ToList();
             }
         }
+        public static List<BankTransaction> GetTransactions(int user_id)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankTransaction>($@"SELECT 
+                    t.name,
+                    t.amount,
+                    a.name as from_account_name,
+                    u.first_name,
+                    c.name as to_account_name,
+                    r.first_name,
+                    t.timestamp
+                    FROM
+                    bank_account a
+                    JOIN bank_user u ON u.id = a.user_id
+                    JOIN bank_transaction t ON a.id = t.from_account_id
+                    JOIN bank_account c ON c.id = t.to_account_id
+                    JOIN bank_user r ON r.id = c.user_id
+                    WHERE
+                    u.id = {user_id};", new DynamicParameters());
+                return output.ToList();
+            }
+        }
         public static List<BankUserModel> GetUserData(int user_id)
         {
-            using(IDbConnection cnn =new NpgsqlConnection(LoadConnectionString()))
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, pin_code , role_id , branch_id FROM bank_user WHERE id = '{user_id}'", new DynamicParameters());
                 return output.ToList();
             }
         }
+
+        public static List<BankUserModel> GetLockedUsers()
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, id FROM bank_user WHERE is_locked = true", new DynamicParameters());
+                return output.ToList();
+
+            }
+        }
+
+        public static void UnlockUser(int unlockID)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Query<BankAccountModel>($"UPDATE bank_user SET is_locked = false WHERE id= '{unlockID}'", new DynamicParameters());
+                cnn.Query<BankAccountModel>($"UPDATE bank_user SET attempts_left = 3 WHERE id= '{unlockID}'", new DynamicParameters());
+            }
+        }
+
         public static List<BankAccountModel> GetTransferAccountData(int user_id, int accountID)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
@@ -55,14 +98,14 @@ namespace Bank
         // Checks if the users exists in the database
         public static bool CheckUserExists(string email)
         {
-            using (NpgsqlConnection cnn = new NpgsqlConnection(LoadConnectionString())) 
+            using (NpgsqlConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 cnn.Open();
                 var sql = $"SELECT COUNT(*) FROM bank_user WHERE email = '{email}'";
                 var cmd = new NpgsqlCommand(sql, cnn);
                 cmd.Parameters.AddWithValue("email", email);
                 bool userExists = (long)cmd.ExecuteScalar() > 0;
-                if(userExists)
+                if (userExists)
                 {
                     cnn.Close();
                     return true;
@@ -162,7 +205,7 @@ namespace Bank
                 Console.WriteLine($"Summa: {amount} SEK");
                 foreach (KeyValuePair<string, object> kvp in transactionOutput.ElementAt(0))
                 {
-                    Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " +  kvp.Value);
+                    Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " + kvp.Value);
                 }
                 Console.ReadKey();
             }
@@ -173,7 +216,8 @@ namespace Bank
             bool isAdmin;
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT * FROM bank_user u INNER JOIN bank_role r ON u.role_id = r.id WHERE u.id = '{Person.id}'", new DynamicParameters());
+                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT * FROM bank_user u INNER JOIN bank_role r ON u.role_id = r.id WHERE u.email = '{Person.Email}'", new DynamicParameters());
+
                 isAdmin = output[0].is_admin;
             }
             return isAdmin;
@@ -185,7 +229,8 @@ namespace Bank
             decimal amount;
             bool successfulInput;
 
-            do {
+            do
+            {
                 Console.Clear();
                 Console.WriteLine("Ange en summa");
                 string? enteredValue = Console.ReadLine();
@@ -195,7 +240,7 @@ namespace Bank
 
                 successfulInput = decimal.TryParse(enteredValue, out amount);
 
-                if(amount < 0)
+                if (amount < 0)
                 {
                     Console.WriteLine("Negativa summor funkar ej.");
                     Console.ReadKey();
@@ -245,14 +290,14 @@ namespace Bank
                 cnn.Query<BankAccountModel>($"UPDATE bank_account SET balance = '{toBalance}' WHERE id='{toAccountID}'", new DynamicParameters());
             }
 
-            Console.WriteLine($"{amount}kr har förts över mellan [{fromAccountName}] till [{toAccountName}]");     
+            Console.WriteLine($"{amount}kr har förts över mellan [{fromAccountName}] till [{toAccountName}]");
             Console.ReadKey();
         }
         public static void CreateUserAcc(BankAccountModel Account)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{Person.id}',1, @balance )", Account);
+                cnn.Execute($"INSERT INTO bank_account (name, interest_rate, user_id, currency_id, balance ) VALUES (@name, @interest_rate, '{Person.id}',@currency_id, @balance )", Account);
             }
         }
         public static void CreateUserAcc(BankAccountModel Account, int userId)
@@ -260,6 +305,15 @@ namespace Bank
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{userId}',1, @balance )", Account);
+            }
+        }
+
+        public static void DeleteUserAcc(int delAccount)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"DELETE FROM bank_transaction WHERE from_account_id='{delAccount}' OR to_account_id='{delAccount}'");
+                cnn.Execute($"DELETE FROM bank_account WHERE id='{delAccount}'");
             }
         }
 
@@ -271,8 +325,8 @@ namespace Bank
 
             }
         }
-        
-        public static void withdrawAcc(int selectedAcc, decimal amount) 
+
+        public static void withdrawAcc(int selectedAcc, decimal amount)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
@@ -281,15 +335,6 @@ namespace Bank
             }
 
         }
-
-        public static void DeleteUserAcc(int delAccount)
-        {
-            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
-            {
-                cnn.Execute($"DELETE FROM bank_transaction WHERE from_account_id='{delAccount}' OR to_account_id='{delAccount}'");
-                cnn.Execute($"DELETE FROM bank_account WHERE id='{delAccount}'");
-            }
-        }
         public static List<BankAccountModel> CurrencyExchange(int userID)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
@@ -297,8 +342,64 @@ namespace Bank
                 var output = cnn.Query<BankAccountModel>(@$"SELECT  bank_account.id,bank_account.user_id, bank_account.name AS account_name, balance, bank_currency.name AS currency_name, bank_currency.exchange_rate AS test,CAST(balance*bank_currency.exchange_rate AS decimal(10,2)) AS SEK FROM  bank_account JOIN bank_currency ON bank_account.currency_id = bank_currency.id 
 WHERE bank_account.user_id={userID};");
 
-                return output.ToList();             
+                return output.ToList();
+
+
             }
+        }
+
+
+        public static void LoginAttempt()
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($@"
+                UPDATE bank_user
+                SET attempts_left = CASE
+                    WHEN attempts_left > 0 THEN attempts_left - 1
+                    ELSE 0
+                END
+                WHERE (email = '{Person.Email}');
+
+                UPDATE bank_user
+                SET is_locked = CASE
+                    WHEN attempts_left = 0 THEN true
+                    else false
+                END
+                WHERE (email = '{Person.Email}');
+                ");
+            }
+        }
+
+        public static void LoginReset()
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($@"
+                UPDATE bank_user
+                SET attempts_left = 3
+                WHERE (email = '{Person.Email}');
+                ");
+            }
+        }
+
+        public static bool IsLocked()
+        {
+            bool result;
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                List<BankUserModel> output = (List<BankUserModel>)cnn.Query<BankUserModel>($"SELECT is_locked FROM bank_user WHERE email = '{Person.Email}'", new DynamicParameters());
+                try
+                {
+                    result = Convert.ToBoolean(output[0].is_locked);
+                }
+                catch
+                {
+                    result = false;
+                }
+
+            }
+            return result;
         }
 
 
@@ -306,6 +407,8 @@ WHERE bank_account.user_id={userID};");
         {
             return ConfigurationManager.ConnectionStrings[id].ConnectionString;
         }
+
+
 
     }
 }

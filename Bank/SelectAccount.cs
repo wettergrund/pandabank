@@ -12,7 +12,7 @@ namespace Bank
         {
             /* Return DB ID of the selected account.  */
             Menu fromAccountMenu = new Menu();
-            List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu(Person.id);
+            List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu();
             int selectedRow;
             while (true)
             {
@@ -34,7 +34,7 @@ namespace Bank
         {
             /* Return DB ID of the selected account, will grey out already selected account  */
             Menu toAccountMenu = new Menu();
-            List<BankAccountModel> options = toAccountMenu.CreateTransferMenu(Person.id, selectedAccount);
+            List<BankAccountModel> options = toAccountMenu.CreateTransferMenu(selectedAccount);
             int selected;
 
             while (true)

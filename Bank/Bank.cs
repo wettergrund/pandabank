@@ -73,7 +73,7 @@ namespace Bank
                         DeleteAccount();
                         break;
                     case 5:
-                        PrintTransaction(Person.id);
+                        PrintTransaction();
                         break;
                     case 6:
                         showMenu = false;
@@ -89,7 +89,7 @@ namespace Bank
         public void ShowAccountBalance()
         {
             Menu BalanceMenu = new Menu();
-            BalanceMenu.CreateTransferMenu(Person.id);
+            BalanceMenu.CreateTransferMenu(true);
             BalanceMenu.UseMenu();
         }
         // Method that allows user to send money between their own accounts
@@ -118,12 +118,11 @@ namespace Bank
 
         public void AdminMenu()
         {
-            Menu CreateAcoountMenu = new Menu(new string[] { "Skapa användare", "Lås upp användare", "Gå tillbaka" });
+            Menu CreateAccountMenu = new Menu(new string[] { "Skapa användare", "Lås upp användare", "Gå tillbaka" });
             bool showMenu = true;
             while (showMenu)
             {
-
-                switch (CreateAcoountMenu.UseMenu())
+                switch (CreateAccountMenu.UseMenu())
                 {
                     case 0:
                         // Get model of new user
@@ -163,18 +162,12 @@ namespace Bank
                         while (!isValidEmail);
 
                         newUser.branch_id = 3;
-
                         //Generate pin for user
                         Random random = new Random();
                         newUser.pin_code = Convert.ToString(random.Next(1000, 9999));
-
                         DataAccess.CreateUser(newUser);
                         Console.WriteLine($"\nAnvändare har skapats\nMail: {newUser.email}\nNamn: {newUser.first_name} {newUser.last_name}\nPinkod: {newUser.pin_code} ");
-
-
                         Console.ReadLine();
-
-
                         break;
                     case 1:
                         Menu LockedUsers = new Menu();
@@ -186,19 +179,14 @@ namespace Bank
                             break;
                         }
                         LockedUsers.UseMenu();
-
                         DataAccess.UnlockUser(userID);
-
                         Console.WriteLine(userID);
-
                         Console.ReadLine();
                         break;
                     case 2:
                         Console.WriteLine("Gå tillbaka");
                         showMenu = false;
                         break;
-
-
                 }
             }
 
@@ -232,10 +220,9 @@ namespace Bank
 
                     string? amount = Console.ReadLine();
                     amount = amount.Replace(",", ".");
-                    var amountsplit = amount.Split(".");
                     bool succAmount = decimal.TryParse(amount, out decimal accValue);
 
-                    if (amountsplit.Length > 1 && amountsplit[1].Length > 2)
+                    if (!Helper.CheckChange(amount))
                     {
                         Console.WriteLine("Du kan max ange 99 ören");
                         Console.ReadKey();
@@ -342,10 +329,10 @@ namespace Bank
             }
         }
 
-        public static void PrintTransaction(int userID)
+        public static void PrintTransaction()
         {
-            Menu transMenu = new Menu();
-            List<BankTransaction> userTrans = DataAccess.GetTransactions(userID);
+            Menu TransactionMenu = new Menu();
+            List<BankTransaction> userTrans = DataAccess.GetTransactions(Person.id);
             for (int i = 0; i < userTrans.Count; i++)
             {
                 Console.WriteLine("-------------------------");

@@ -19,8 +19,8 @@ namespace Bank
         int selectedIndex = 0; // Keeps track of menu positions
         ConsoleColor color = ConsoleColor.DarkYellow; // Color of the menu
         string output = string.Empty; // Output - Printed above the menu
-        private char selectedChar = '├'; // Char to show currently selected item in menu
-        private char regularChar = '│'; // Char for the rest
+        private char selectedItem = '├'; // Char to show currently selected item in menu
+        private char item = '│'; // Char for the rest
 
         // Takes an array of strings on class instantiation
         public Menu() { }
@@ -28,7 +28,7 @@ namespace Bank
         {
             menuItems = items;
         }
-
+        #region GettersAndSetters
         // Getter and setter for the selected index
         // SelectedIndex is the currently selected item in the menu
         public int SelectIndex
@@ -74,6 +74,17 @@ namespace Bank
             get { return color; }
             set { color = value; }
         }
+        public char SelectedItem
+        {
+            get { return selectedItem; }
+            set { selectedItem = value; }
+        }
+        public char Item
+        {
+            get { return item; }
+            set { item = value; }
+        }
+        #endregion
         // Moves the cursor to the right of currently selected menu item
         public void MoveCursorRight()
         {
@@ -108,21 +119,21 @@ namespace Bank
                 if (i == selectedIndex)
                 {
                     Console.ForegroundColor = color;
-                    Console.WriteLine("{0} {1}", selectedChar, menuItems[i]);
+                    Console.WriteLine("{0} {1}", selectedItem, menuItems[i]);
                 }
                 else
                 {
                     Console.ResetColor();
-                    Console.WriteLine("{0} {1}",regularChar, menuItems[i]);
+                    Console.WriteLine("{0} {1}",item, menuItems[i]);
                 }
                 Console.ResetColor();
             }
         }
 
         // Creates a menu for the logged in user, and then sets it - Also able to return the menuArray
-        public string[] CreateMenu(int userID)
+        public string[] CreateMenu()
         {
-            List<BankAccountModel> currentUser = DataAccess.GetAccountData(userID);
+            List<BankAccountModel> currentUser = DataAccess.GetAccountData(Person.id);
             string[] accountMenuItems = new string[currentUser.Count + 1];
 
             for (int i = 0; i < currentUser.Count + 1; i++)
@@ -141,10 +152,10 @@ namespace Bank
         }
 
         // Creates a menu for the logged in user, and then sets it - Also able to return the menuArray
-        public List<BankAccountModel> CreateTransferMenu(int userID)
+        public List<BankAccountModel> CreateTransferMenu(bool hasBack = false)
         {
             // Gets the account data into a list for the currently logged on user
-            List<BankAccountModel> currentUser = DataAccess.GetAccountData(userID);
+            List<BankAccountModel> currentUser = DataAccess.GetAccountData(Person.id);
             string[] accountMenuItems = new string[currentUser.Count + 1];
             //Fills the menuArray with current users account name, and balance - And adds a Go back option at the end
             for (int i = 0; i < currentUser.Count + 1; i++)
@@ -188,9 +199,9 @@ namespace Bank
             return currentUser[0].id;
         }
         // Creates a menuarray that shows the accounts name and balance - Then sets that as the current menu
-        public List<BankAccountModel> CreateTransferMenu(int userID, int selectedItem)
+        public List<BankAccountModel> CreateTransferMenu(int selectedItem, bool hasBack = false)
         {
-                List<BankAccountModel> currentUser = DataAccess.GetTransferAccountData(userID, selectedItem);
+                List<BankAccountModel> currentUser = DataAccess.GetTransferAccountData(Person.id, selectedItem);
                 string[] accountMenuItems = new string[currentUser.Count + 1];
             //Fills the menuArray with current users account name, and balance - And adds a Go back option at the end
             for (int i = 0; i < currentUser.Count + 1; i++)

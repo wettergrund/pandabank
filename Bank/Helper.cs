@@ -41,6 +41,16 @@ namespace Bank
             return pin;
         }
 
+        public static bool CheckChange(string input) 
+        {
+            var inputSplit = input.Split(".");
+            if (inputSplit.Length > 1 && inputSplit[1].Length > 2)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public static void ResetUserData()
         {
             Person.id = -1;

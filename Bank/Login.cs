@@ -25,9 +25,7 @@ namespace Bank
                         GetUserEmail();
                         break;
                     case 1:
-                        
-                        login = GetUserPincode();
-                        
+                        login = GetUserPincode();     
                         break;
                     case 2:
                         return false;
@@ -73,7 +71,7 @@ namespace Bank
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Konto låst, kontakta banken för att få det upplåst");
-                        Console.ReadLine();
+                        Console.ReadKey();
                         Console.ResetColor();
                         //return false;
                     }
@@ -81,11 +79,8 @@ namespace Bank
                     {
                         Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
                         Console.ReadKey();
-
                     }
-                }
-                
-
+                }        
             }
             else
             {

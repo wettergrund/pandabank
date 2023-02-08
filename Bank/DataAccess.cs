@@ -201,7 +201,6 @@ namespace Bank
                         JOIN bank_user r ON r.id = c.user_id
                     ORDER BY t.timestamp DESC");
                 Console.Clear();
-                Console.WriteLine($"Summa: {amount} SEK");
                 foreach (KeyValuePair<string, object> kvp in transactionOutput.ElementAt(0))
                 {
                     Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " +  kvp.Value);
@@ -232,9 +231,7 @@ namespace Bank
                 Console.Clear();
                 Console.WriteLine("Ange en summa");
                 string? enteredValue = Console.ReadLine();
-
                 enteredValue = enteredValue.Replace(",", ".");
-                var countPennies = enteredValue.Split('.');
 
                 successfulInput = decimal.TryParse(enteredValue, out amount);
 
@@ -244,7 +241,7 @@ namespace Bank
                     Console.ReadKey();
                     successfulInput = false;
                 }
-                if (countPennies.Length > 1 && countPennies[1].Length > 2)
+                if (!Helper.CheckChange(enteredValue))
                 {
                     Console.WriteLine("Du kan max ange 99 ören");
                     Console.ReadKey();

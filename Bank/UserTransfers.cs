@@ -46,7 +46,7 @@ namespace Bank
         private void FromAccount()
         {
             Menu fromAccountMenu = new Menu();
-            List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu(Person.id);
+            List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu(true);
             int selectedRow;
             while (true)
             {
@@ -80,8 +80,9 @@ namespace Bank
         {
             TransferMenu.MoveCursorRight();
             string answer = Console.ReadLine();
+            answer = answer.Replace(",", ".");
             bool success = decimal.TryParse(answer, out amount);
-            if (success)
+            if (success && Helper.CheckChange(answer))
             {
                 bool enoughFunds = DataAccess.CheckAccountFunds(fromID, amount);
                 if (enoughFunds)
@@ -93,6 +94,10 @@ namespace Bank
                     amount = 0;
                     Warning("Inte tillräcklig täckning på kontot. Försök igen.");
                 }
+            }
+            else
+            {
+                Warning("Ange endast siffror och ej fler än två decimaler.");
             }
         }
         // If all data input is valid, the transaction will go through

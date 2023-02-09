@@ -305,6 +305,24 @@ namespace Bank
                 cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{userId}',1, @balance )", Account);
             }
         }
+        public static void DepositAcc(int selectedAcc, decimal amount)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"UPDATE bank_account SET balance=balance + '{amount}' WHERE id='{selectedAcc}'");
+
+            }
+        }
+
+        public static void withdrawAcc(int selectedAcc, decimal amount)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Execute($"UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{selectedAcc}'");
+
+            }
+
+        }
 
         public static void DeleteUserAcc(int delAccount)
         {

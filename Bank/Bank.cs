@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -355,5 +357,91 @@ namespace Bank
             Console.ReadKey();
 
         }
+        public void DepositMoney()
+        {
+            //Fixa så menu val ligger brevid varanda ?
+            Menu depositMenu = new Menu();
+            List<BankAccountModel> accounts = depositMenu.CreateTransferMenu(Person.id);
+            int selectedAccount;
+            decimal depositMoney = 0;
+
+            depositMenu.Output = "Välj konto.";
+            selectedAccount = depositMenu.UseMenu();
+            decimal userInput;
+            Console.WriteLine("Ange hur mycket du vill du vill sätta in.");
+            decimal.TryParse(Console.ReadLine(), out userInput);
+            if (userInput > 0)
+            {
+                depositMoney = userInput;
+                Console.WriteLine("Du har satt in " + userInput + ":- på konto [" + accounts[selectedAccount].name + "]");
+                Console.ReadKey();
+                DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
+            }
+            else
+            {
+                Console.WriteLine("Ogiltigt belopp");
+                Console.ReadKey();
+            }
+        }
+        public void withdrawMoney()
+        {
+            decimal withdrawMoney = 0;
+            Menu withdrawMenu = new Menu();
+            List<BankAccountModel> accounts = withdrawMenu.CreateTransferMenu(Person.id);
+            withdrawMenu.Output = "Välj Konto";
+            int selectedAccount = withdrawMenu.UseMenu();
+            Menu withdrawAmount = new Menu(new string[] { "100:-", "200:-", "500:-", "1000:-", "Ange egen summa." });
+            switch (withdrawAmount.UseMenu())
+            {
+
+                case 0:
+                    withdrawMoney = 100;
+                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
+                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                    Console.ReadKey();
+                    break;
+                case 1:
+                    withdrawMoney = 200;
+                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
+                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                    Console.ReadKey();
+                    break;
+                case 2:
+                    withdrawMoney = 500;
+                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
+                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                    Console.ReadKey();
+                    break;
+                case 3:
+                    withdrawMoney = 1000;
+                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
+                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                    Console.ReadKey(); break;
+                case 4:
+                    decimal userInput;
+                    Console.WriteLine("Ange hur mycket du vill du vill dra ut.");
+                    decimal.TryParse(Console.ReadLine(), out userInput);
+                    if (userInput > 0)
+                    {
+                        withdrawMoney = userInput;
+                        Console.WriteLine("Du tog ut " + userInput + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                        Console.ReadKey();
+                        DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ogiltigt belopp");
+                        Console.ReadKey();
+                    }
+                    break;
+                case 5:
+                    break;
+
+
+            }
+        }
     }
+
 }
+
+

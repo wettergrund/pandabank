@@ -6,6 +6,8 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlTypes;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -60,7 +62,6 @@ namespace Bank
             {
                 var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, id FROM bank_user WHERE is_locked = true", new DynamicParameters());
                 return output.ToList();
-
             }
         }
 
@@ -146,6 +147,8 @@ namespace Bank
                 cnn.Query($"INSERT INTO bank_user (first_name, last_name, pin_code, role_id, branch_id, email) VALUES ('{user.first_name}','{user.last_name}','{user.pin_code}','{user.role_id}','{user.branch_id}','{user.email}')", new DynamicParameters());
             }
             BankAccountModel newAcc = new BankAccountModel();
+            newAcc.interest_rate = Helper.AccountType();
+            newAcc.currency_id = Helper.CurrencyType();
             newAcc.name = "Personkonto";
             newAcc.balance = 0;
 
@@ -173,19 +176,25 @@ namespace Bank
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankAccountModel>($"Select id FROM bank_account WHERE user_id = '{userID}' ORDER BY id ASC", new DynamicParameters());
-                return output.ElementAt(0).id;
+                try
+                {
+                    var output = cnn.Query<BankAccountModel>($"Select id FROM bank_account WHERE user_id = '{userID}' AND EXISTS (SELECT id FROM bank_account WHERE id) ORDER BY id ASC", new DynamicParameters());
+                    return output.ElementAt(0).id;
+                }
+                catch(NpgsqlException)
+                {
+                    return -1; // If user doesn't have any accounts, returns -1
+                }               
             }
         }
         public static void TransferToUser(int from_account, int to_account, decimal amount)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query($@"
-                    UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{from_account}';
-                    UPDATE bank_account SET balance=balance + '{amount}' WHERE id='{to_account}';
+                    cnn.Execute($@"
+                    UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{from_account}');
+                    UPDATE bank_account SET balance=balance + '{amount}' WHERE id='{to_account}');
                     INSERT INTO bank_transaction (name, amount, from_account_id, to_account_id) VALUES ('Överföring', '{amount}','{from_account}', '{to_account}');");
-
                 var transactionOutput = cnn.Query($@"
                     SELECT
                         u.first_name as Från_användare,
@@ -200,11 +209,10 @@ namespace Bank
                         JOIN bank_user u ON u.id = b.user_id
                         JOIN bank_user r ON r.id = c.user_id
                     ORDER BY t.timestamp DESC");
-                Console.Clear();
-                Console.WriteLine($"Summa: {amount} SEK");
+                    Console.Clear();
                 foreach (KeyValuePair<string, object> kvp in transactionOutput.ElementAt(0))
                 {
-                    Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " +  kvp.Value);
+                    Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " + kvp.Value);
                 }
                 Console.ReadKey();
             }
@@ -232,9 +240,7 @@ namespace Bank
                 Console.Clear();
                 Console.WriteLine("Ange en summa");
                 string? enteredValue = Console.ReadLine();
-
                 enteredValue = enteredValue.Replace(",", ".");
-                var countPennies = enteredValue.Split('.');
 
                 successfulInput = decimal.TryParse(enteredValue, out amount);
 
@@ -244,7 +250,7 @@ namespace Bank
                     Console.ReadKey();
                     successfulInput = false;
                 }
-                if (countPennies.Length > 1 && countPennies[1].Length > 2)
+                if (!Helper.CheckChange(enteredValue))
                 {
                     Console.WriteLine("Du kan max ange 99 ören");
                     Console.ReadKey();
@@ -302,7 +308,7 @@ namespace Bank
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{userId}',1, @balance )", Account);
+                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, interest_rate, balance ) VALUES (@name, '{userId}',@currency_id, @interest_rate ,@balance )", Account);
             }
         }
         public static void DepositAcc(int selectedAcc, decimal amount)
@@ -340,8 +346,6 @@ namespace Bank
 WHERE bank_account.user_id={userID};");
 
                 return output.ToList();
-
-             
             }
         }
 
@@ -394,18 +398,29 @@ WHERE bank_account.user_id={userID};");
                 {
                     result = false;
                 }
-
             }
             return result;
         }
 
-
         private static string LoadConnectionString(string id = "Default")
         {
-            return ConfigurationManager.ConnectionStrings[id].ConnectionString;
+            try
+            {
+                using (IDbConnection cnn = new NpgsqlConnection(ConfigurationManager.ConnectionStrings[id].ConnectionString)) 
+                {
+                    cnn.Open();
+                    cnn.Close();
+                    return ConfigurationManager.ConnectionStrings[id].ConnectionString;
+                };
+            }
+            catch (Npgsql.PostgresException e)
+            {
+                return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
+            }
+            catch(System.Net.Sockets.SocketException e)
+            {
+                return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
+            }
         }
-
-
-
     }
 }

@@ -50,8 +50,7 @@ namespace Bank
             if (isAdmin)
             {
                 UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto","Se historik", "Logga ut", "Admin" });
-            }
-            
+            }           
             UserTransfers TransferToUser = new UserTransfers();
             bool showMenu = true;
 
@@ -75,7 +74,7 @@ namespace Bank
                         DeleteAccount();
                         break;
                     case 5:
-                        PrintTransaction(Person.id);
+                        PrintTransaction();
                         break;
                     case 6:
                         showMenu = false;
@@ -91,7 +90,7 @@ namespace Bank
         public void ShowAccountBalance()
         {
             Menu BalanceMenu = new Menu();
-            BalanceMenu.CreateTransferMenu(Person.id);
+            BalanceMenu.CreateTransferMenu();
             BalanceMenu.UseMenu();
         }
         // Method that allows user to send money between their own accounts
@@ -120,12 +119,11 @@ namespace Bank
 
         public void AdminMenu()
         {
-            Menu CreateAcoountMenu = new Menu(new string[] { "Skapa användare", "Lås upp användare", "Gå tillbaka" });
+            Menu CreateAccountMenu = new Menu(new string[] { "Skapa användare", "Lås upp användare", "Gå tillbaka" });
             bool showMenu = true;
             while (showMenu)
             {
-
-                switch (CreateAcoountMenu.UseMenu())
+                switch (CreateAccountMenu.UseMenu())
                 {
                     case 0:
                         // Get model of new user
@@ -138,9 +136,9 @@ namespace Bank
                             Console.Clear();
                             Console.CursorTop = 0;
                             Console.Write($"Ange förnamn: ");
-                            newUser.first_name = Console.ReadLine();
+                            newUser.first_name = Helper.FormatString(Console.ReadLine());
                             Console.Write($"Ange efternamn: ");
-                            newUser.last_name = Console.ReadLine();
+                            newUser.last_name = Helper.FormatString(Console.ReadLine());
 
                             // Error handling for incorrect name.
                             bool isValidName = newUser.first_name.Length > 0 && newUser.last_name.Length > 0 ? true : false;
@@ -152,7 +150,7 @@ namespace Bank
                             }
 
                             Console.Write($"Ange mail: ");
-                            newUser.email = Console.ReadLine();
+                            newUser.email = Helper.FormatString(Console.ReadLine());
 
                             // Error handling for incorrect email.
                             isValidEmail = regex.IsMatch(newUser.email);
@@ -165,18 +163,12 @@ namespace Bank
                         while (!isValidEmail);
 
                         newUser.branch_id = 3;
-
                         //Generate pin for user
                         Random random = new Random();
                         newUser.pin_code = Convert.ToString(random.Next(1000, 9999));
-
                         DataAccess.CreateUser(newUser);
                         Console.WriteLine($"\nAnvändare har skapats\nMail: {newUser.email}\nNamn: {newUser.first_name} {newUser.last_name}\nPinkod: {newUser.pin_code} ");
-
-
                         Console.ReadLine();
-
-
                         break;
                     case 1:
                         Menu LockedUsers = new Menu();
@@ -188,30 +180,25 @@ namespace Bank
                             break;
                         }
                         LockedUsers.UseMenu();
-
                         DataAccess.UnlockUser(userID);
-
                         Console.WriteLine(userID);
-
                         Console.ReadLine();
                         break;
                     case 2:
                         Console.WriteLine("Gå tillbaka");
                         showMenu = false;
                         break;
-
-
                 }
             }
 
         }
-        //Method to creat a savings account
+        //Method to create an account
         private void CreateAccount()
         {
             BankAccountModel newAccount = new BankAccountModel();
             Console.Write("Kontonamn: ");
             string currencyName = "SEK;";
-            string accountName = Console.ReadLine();
+            string accountName = Helper.FormatString(Console.ReadLine());
             if (!Regex.IsMatch(accountName, @"^[a-öA-Ö]+$"))
             {
                 Console.WriteLine("Du kan bara skapa konton med bokstäver");
@@ -223,8 +210,8 @@ namespace Bank
                 bool success = true;
                 do
                 {
-                    newAccount.interest_rate = AccountType();
-                    newAccount.currency_id = CurrencyType();
+                    newAccount.interest_rate = Helper.AccountType();
+                    newAccount.currency_id = Helper.CurrencyType();
                     if(newAccount.currency_id == 2)
                     {
                         currencyName = "USD";
@@ -234,10 +221,9 @@ namespace Bank
 
                     string? amount = Console.ReadLine();
                     amount = amount.Replace(",", ".");
-                    var amountsplit = amount.Split(".");
                     bool succAmount = decimal.TryParse(amount, out decimal accValue);
 
-                    if (amountsplit.Length > 1 && amountsplit[1].Length > 2)
+                    if (!Helper.CheckChange(amount))
                     {
                         Console.WriteLine("Du kan max ange 99 ören");
                         Console.ReadKey();
@@ -267,38 +253,6 @@ namespace Bank
                     }
                 }
                 while (!success);
-            }
-        }
-
-        private double AccountType()
-        {
-            Menu AccountTypeMenu = new Menu(new string[] {"Personkonto - 0% Ränta", "Sparkonto - 1.25% Ränta","Pensionsfond - 4% Ränta"});
-            AccountTypeMenu.Output = "Välj typ av konto: ";
-            switch(AccountTypeMenu.UseMenu())
-            {
-                case 0:
-                    return 0;
-                case 1:
-                    return 1.25;
-                case 2:
-                    return 4;
-                default:
-                    return 0;
-            }
-        }
-
-        private int CurrencyType()
-        {
-            Menu CurrencyTypeMenu = new Menu(new string[] { "SEK", "USD" });
-            CurrencyTypeMenu.Output = "Välj valuta: ";
-            switch (CurrencyTypeMenu.UseMenu())
-            {
-                case 0:
-                    return 1; // SEK
-                case 1:
-                    return 2; // USD
-                default:
-                    return 1;
             }
         }
 
@@ -338,16 +292,15 @@ namespace Bank
                     {
                         Console.WriteLine("Fel pinkod skriv rätt hallå");
                         Console.ReadKey();
-
                     }
                 }
             }
         }
 
-        public static void PrintTransaction(int userID)
+        public static void PrintTransaction()
         {
-            Menu transMenu = new Menu();
-            List<BankTransaction> userTrans = DataAccess.GetTransactions(userID);
+            Menu TransactionMenu = new Menu();
+            List<BankTransaction> userTrans = DataAccess.GetTransactions(Person.id);
             for (int i = 0; i < userTrans.Count; i++)
             {
                 Console.WriteLine("-------------------------");

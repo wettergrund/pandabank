@@ -48,8 +48,7 @@ namespace Bank
             if (isAdmin)
             {
                 UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto","Se historik", "Logga ut", "Admin" });
-            }
-            
+            }           
             UserTransfers TransferToUser = new UserTransfers();
             bool showMenu = true;
 
@@ -191,7 +190,7 @@ namespace Bank
             }
 
         }
-        //Method to creat a savings account
+        //Method to create an account
         private void CreateAccount()
         {
             BankAccountModel newAccount = new BankAccountModel();
@@ -291,7 +290,6 @@ namespace Bank
                     {
                         Console.WriteLine("Fel pinkod skriv rätt hallå");
                         Console.ReadKey();
-
                     }
                 }
             }

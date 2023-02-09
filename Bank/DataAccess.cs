@@ -62,7 +62,6 @@ namespace Bank
             {
                 var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, id FROM bank_user WHERE is_locked = true", new DynamicParameters());
                 return output.ToList();
-
             }
         }
 
@@ -185,8 +184,7 @@ namespace Bank
                 catch(NpgsqlException)
                 {
                     return -1; // If user doesn't have any accounts, returns -1
-                }
-                
+                }               
             }
         }
         public static void TransferToUser(int from_account, int to_account, decimal amount)
@@ -212,11 +210,11 @@ namespace Bank
                         JOIN bank_user r ON r.id = c.user_id
                     ORDER BY t.timestamp DESC");
                     Console.Clear();
-                    foreach (KeyValuePair<string, object> kvp in transactionOutput.ElementAt(0))
-                    {
-                        Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " + kvp.Value);
-                    }
-                    Console.ReadKey();
+                foreach (KeyValuePair<string, object> kvp in transactionOutput.ElementAt(0))
+                {
+                    Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " + kvp.Value);
+                }
+                Console.ReadKey();
             }
         }
         public static bool AdminAccess()
@@ -382,7 +380,6 @@ WHERE bank_account.user_id={userID};");
                 {
                     result = false;
                 }
-
             }
             return result;
         }
@@ -407,16 +404,5 @@ WHERE bank_account.user_id={userID};");
                 return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
             }
         }
-
-        //private static bool isAvailable(IDbConnection cnn = new NpgsqlConnection(LoadConnectionString))
-        //{
-        //    try
-        //    {
-
-        //    }
-        //}
-
-
-
     }
 }

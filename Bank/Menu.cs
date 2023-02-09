@@ -201,20 +201,20 @@ namespace Bank
         // Creates a menuarray that shows the accounts name and balance - Then sets that as the current menu
         public List<BankAccountModel> CreateTransferMenu(int selectedItem)
         {
-                List<BankAccountModel> currentUser = DataAccess.GetTransferAccountData(Person.id, selectedItem);
-                string[] accountMenuItems = new string[currentUser.Count + 1];
+            List<BankAccountModel> currentUser = DataAccess.GetTransferAccountData(Person.id, selectedItem);
+            string[] accountMenuItems = new string[currentUser.Count + 1];
             //Fills the menuArray with current users account name, and balance - And adds a Go back option at the end
             for (int i = 0; i < currentUser.Count + 1; i++)
+            {
+                if (i < currentUser.Count)
                 {
-                    if (i < currentUser.Count)
-                    {
-                        accountMenuItems[i] = currentUser.ElementAt(i).name + ": " + currentUser.ElementAt(i).balance;
-                    }
-                    else
-                    {
-                        accountMenuItems[i] = "Gå tillbaka";
-                    }
+                    accountMenuItems[i] = currentUser.ElementAt(i).name + ": " + currentUser.ElementAt(i).balance;
                 }
+                else
+                {
+                    accountMenuItems[i] = "Gå tillbaka";
+                }
+            }
             MenuItems = accountMenuItems;
             return currentUser;
         }

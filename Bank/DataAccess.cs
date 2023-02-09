@@ -29,12 +29,12 @@ namespace Bank
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 var output = cnn.Query<BankTransaction>($@"SELECT 
-                    t.name,
+                    t.name as transaction_name,
                     t.amount,
                     a.name as from_account_name,
-                    u.first_name,
+                    u.first_name as from_user,
                     c.name as to_account_name,
-                    r.first_name,
+                    r.first_name as to_user,
                     t.timestamp
                     FROM
                     bank_account a
@@ -320,14 +320,12 @@ namespace Bank
             }
         }
 
-        public static void withdrawAcc(int selectedAcc, decimal amount)
+        public static void WithdrawAcc(int selectedAcc, decimal amount)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 cnn.Execute($"UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{selectedAcc}'");
-
             }
-
         }
 
         public static void DeleteUserAcc(int delAccount)
@@ -340,15 +338,26 @@ namespace Bank
         }
         public static List<BankAccountModel> CurrencyExchange(int userID)
         {
+            // Ta emot currency_name/ID på pengarna och currency_name/ID på vad som det ska omvandlas till
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankAccountModel>(@$"SELECT  bank_account.id,bank_account.user_id, bank_account.name AS account_name, balance, bank_currency.name AS currency_name, bank_currency.exchange_rate AS test,CAST(balance*bank_currency.exchange_rate AS decimal(10,2)) AS SEK FROM  bank_account JOIN bank_currency ON bank_account.currency_id = bank_currency.id 
-WHERE bank_account.user_id={userID};");
+                var output = cnn.Query<BankAccountModel>($@"
+                SELECT
+                    bank_account.id,
+                    bank_account.user_id, 
+                    bank_account.name AS account_name, 
+                    balance, bank_currency.name AS currency_name, 
+                    bank_currency.exchange_rate AS test,
+                CAST
+                    (balance*bank_currency.exchange_rate AS decimal(10,2)) AS SEK 
+                FROM
+                    bank_account 
+                    JOIN bank_currency ON bank_account.currency_id = bank_currency.id
+                WHERE bank_account.user_id={userID};");
 
                 return output.ToList();
             }
         }
-
 
         public static void LoginAttempt()
         {

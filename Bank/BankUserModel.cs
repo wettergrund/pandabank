@@ -19,7 +19,6 @@ namespace Bank
         public string last_name { get; set; }
 
         public string pin_code { get; set; }
-        public string user_name { get; set; }
         public string email { get; set; }
 
         public int role_id { get; set; }

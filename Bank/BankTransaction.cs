@@ -11,7 +11,11 @@ namespace Bank
     {
         public int id { get; set; }
 
-        public string name { get; set; }
+        public string from_user { get; set; }
+
+        public string to_user { get; set; }
+
+        public string transaction_name { get; set; }
 
         public string from_account_name { get; set; }
 

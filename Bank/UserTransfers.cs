@@ -27,7 +27,7 @@ namespace Bank
                         break;
                     case 1:
                         ResetRow("Till:");
-                        ToUser();
+                        SelectTransferType();
                         break;
                     case 2:
                         ResetRow("Summa:");
@@ -64,6 +64,27 @@ namespace Bank
                 }
             }
         }
+
+        private void SelectTransferType()
+        {
+            Menu TransferTypeMenu = new Menu(new string[] {"Egna konton", "Annan användare"});
+            TransferTypeMenu.Output = "Välj typen av överföring.";
+            switch(TransferTypeMenu.UseMenu())
+            {
+                case 0:
+                    Menu AccountMenu = new Menu();
+                    AccountMenu.CreateTransferMenu();
+                    AccountMenu.UseMenu();
+                    TransferMenu.SetMenuItem($"Till: {AccountMenu.GetMenuItem()}", 1);
+                    break;
+                case 1:
+                    TransferMenu.PrintMenu();
+                    ToUser();
+                    break;
+                case 2:
+                    break;
+            }
+        }
         // Prompts user to enter the recieving account, and then checks if user exists
         private void ToUser()
         {
@@ -79,8 +100,7 @@ namespace Bank
         private void GetAmountToTransfer()
         {
             TransferMenu.MoveCursorRight();
-            string answer = Console.ReadLine();
-            answer = answer.Replace(",", ".");
+            string answer = Console.ReadLine().Replace(",", ".");
             bool success = decimal.TryParse(answer, out amount);
             if (success && Helper.CheckChange(answer))
             {
@@ -169,13 +189,13 @@ namespace Bank
             TransferMenu.SetMenuItem("Välj Konto:", 0);
             TransferMenu.SetMenuItem("Till:", 1);
             TransferMenu.SetMenuItem("Summa:", 2);
-            TransferMenu.PrintSystem();
+            TransferMenu.PrintMenu();
         }
         // Resets a specific row
         private void ResetRow(string row)
         {
             TransferMenu.SetMenuItem(row, TransferMenu.SelectIndex);
-            TransferMenu.PrintSystem();
+            TransferMenu.PrintMenu();
         }
         //Moves the cursor to the bottom, prints the given error/warning message to the user
         //Resets the menu output and moves the cursor back
@@ -208,7 +228,7 @@ namespace Bank
             {
                 toEmail = "";
                 Warning("Otillåtna tecken. Försök igen.");
-                TransferMenu.PrintSystem();
+                TransferMenu.PrintMenu();
             }
             return true;
         }

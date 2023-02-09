@@ -10,14 +10,13 @@ namespace Bank
 {
     public class Login
     {
-        readonly Menu LoginMenu = new Menu(new string[] { "Email:", "Pinkod:", "Gå tillbaka" });
-        public bool LoginChecker()
+        readonly static Menu LoginMenu = new Menu(new string[] { "Email:", "Pinkod:", "Gå tillbaka" });
+        public static bool LoginChecker()
         {
             ResetLoginData();
             bool login = true;
             while (login)
             {
- 
                 switch (LoginMenu.UseMenu())
                 {
                     case 0:
@@ -25,7 +24,7 @@ namespace Bank
                         GetUserEmail();
                         break;
                     case 1:
-                        login = GetUserPincode();     
+                        login = GetUserPincode();
                         break;
                     case 2:
                         return false;
@@ -35,7 +34,7 @@ namespace Bank
         }
 
         // Prompts the user to enter their email, then validates it
-        private void GetUserEmail()
+        private static void GetUserEmail()
         {
             bool isEmail = true;
             while (isEmail)
@@ -45,7 +44,7 @@ namespace Bank
             }
         }
         // Prompts the user to enter their pincode and checks if its valid
-        private bool GetUserPincode()
+        private static bool GetUserPincode()
         {
             
             bool pinCheck = true;
@@ -66,25 +65,43 @@ namespace Bank
                 if (!pinCheck)
                 {
                     DataAccess.LoginAttempt();
-                    bool isLocked = DataAccess.IsLocked();
-                    if (isLocked)
+                    if (LockedAccount())
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Konto låst, kontakta banken för att få det upplåst");
                         Console.ReadKey();
                         Console.ResetColor();
-                        //return false;
                     }
                     else
                     {
                         Console.WriteLine("Fel användarnamn eller lösenord. Försök igen.");
                         Console.ReadKey();
                     }
-                }        
+                }
             }
             else
             {
-                Person.id = DataAccess.GetUserID(Person.Email, Person.PinCode);
+                if(LockedAccount())
+                {
+                    Person.id = DataAccess.GetUserID(Person.Email, Person.PinCode);
+                    return false;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Konto låst, kontakta banken för att få det upplåst");
+                    Console.ReadKey();
+                    Console.ResetColor();
+                }
+            }
+            return true;
+        }
+
+        private static bool LockedAccount()
+        {
+            bool isLocked = DataAccess.IsLocked();
+            if (isLocked)
+            {
                 return false;
             }
             return true;
@@ -92,24 +109,24 @@ namespace Bank
 
         //Resets the stored email/pincode for Person.cs
         //Also resets the menu prints to remove the previously stored email
-        private void ResetLoginData()
+        private static void ResetLoginData()
         {
             Person.Email = "";
             Person.PinCode = "";
             LoginMenu.SetMenuItem("Email:", 0);
             LoginMenu.SelectIndex = 0;
-            LoginMenu.PrintSystem();
+            LoginMenu.PrintMenu();
         }
 
-        private void ResetRow(string row)
+        private static void ResetRow(string row)
         {
             LoginMenu.SetMenuItem(row, LoginMenu.SelectIndex);
-            LoginMenu.PrintSystem();
+            LoginMenu.PrintMenu();
         }
 
         //Moves the cursor to the bottom, prints the given error/warning message to the user
         //Resets the menu output and moves the cursor back
-        private void Warning(string menuItem, string errorMessage)
+        private static void Warning(string menuItem, string errorMessage)
         {
  
 
@@ -121,7 +138,7 @@ namespace Bank
         }
 
         // Checks if email only has allowed characters (Alphabetic letters, numbers and underscore)
-        private bool ValidateEmail(string email)
+        private static bool ValidateEmail(string email)
         {
             if (Regex.IsMatch(email, @"^[a-zA-Z0-9_@.]+$"))
             {
@@ -135,7 +152,7 @@ namespace Bank
         }
 
         //Checks if password only contains integers
-        private bool ValidatePincode(string pincode)
+        private static bool ValidatePincode(string pincode)
         {
             bool success = int.TryParse(pincode, out int result);
             if (success && pincode.Length <= 4)

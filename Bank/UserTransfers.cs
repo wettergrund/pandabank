@@ -46,7 +46,7 @@ namespace Bank
         private void FromAccount()
         {
             Menu fromAccountMenu = new Menu();
-            List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu(true);
+            List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu();
             int selectedRow;
             while (true)
             {

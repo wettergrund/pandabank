@@ -152,7 +152,7 @@ namespace Bank
         }
 
         // Creates a menu for the logged in user, and then sets it - Also able to return the menuArray
-        public List<BankAccountModel> CreateTransferMenu(bool hasBack = false)
+        public List<BankAccountModel> CreateTransferMenu()
         {
             // Gets the account data into a list for the currently logged on user
             List<BankAccountModel> currentUser = DataAccess.GetAccountData(Person.id);
@@ -199,7 +199,7 @@ namespace Bank
             return currentUser[0].id;
         }
         // Creates a menuarray that shows the accounts name and balance - Then sets that as the current menu
-        public List<BankAccountModel> CreateTransferMenu(int selectedItem, bool hasBack = false)
+        public List<BankAccountModel> CreateTransferMenu(int selectedItem)
         {
                 List<BankAccountModel> currentUser = DataAccess.GetTransferAccountData(Person.id, selectedItem);
                 string[] accountMenuItems = new string[currentUser.Count + 1];

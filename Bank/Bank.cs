@@ -89,7 +89,7 @@ namespace Bank
         public void ShowAccountBalance()
         {
             Menu BalanceMenu = new Menu();
-            BalanceMenu.CreateTransferMenu(true);
+            BalanceMenu.CreateTransferMenu();
             BalanceMenu.UseMenu();
         }
         // Method that allows user to send money between their own accounts

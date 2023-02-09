@@ -135,9 +135,9 @@ namespace Bank
                             Console.Clear();
                             Console.CursorTop = 0;
                             Console.Write($"Ange förnamn: ");
-                            newUser.first_name = Console.ReadLine();
+                            newUser.first_name = Helper.FormatString(Console.ReadLine());
                             Console.Write($"Ange efternamn: ");
-                            newUser.last_name = Console.ReadLine();
+                            newUser.last_name = Helper.FormatString(Console.ReadLine());
 
                             // Error handling for incorrect name.
                             bool isValidName = newUser.first_name.Length > 0 && newUser.last_name.Length > 0 ? true : false;
@@ -149,7 +149,7 @@ namespace Bank
                             }
 
                             Console.Write($"Ange mail: ");
-                            newUser.email = Console.ReadLine();
+                            newUser.email = Helper.FormatString(Console.ReadLine());
 
                             // Error handling for incorrect email.
                             isValidEmail = regex.IsMatch(newUser.email);
@@ -197,7 +197,7 @@ namespace Bank
             BankAccountModel newAccount = new BankAccountModel();
             Console.Write("Kontonamn: ");
             string currencyName = "SEK;";
-            string accountName = Console.ReadLine();
+            string accountName = Helper.FormatString(Console.ReadLine());
             if (!Regex.IsMatch(accountName, @"^[a-öA-Ö]+$"))
             {
                 Console.WriteLine("Du kan bara skapa konton med bokstäver");
@@ -209,8 +209,8 @@ namespace Bank
                 bool success = true;
                 do
                 {
-                    newAccount.interest_rate = AccountType();
-                    newAccount.currency_id = CurrencyType();
+                    newAccount.interest_rate = Helper.AccountType();
+                    newAccount.currency_id = Helper.CurrencyType();
                     if(newAccount.currency_id == 2)
                     {
                         currencyName = "USD";
@@ -252,38 +252,6 @@ namespace Bank
                     }
                 }
                 while (!success);
-            }
-        }
-
-        private double AccountType()
-        {
-            Menu AccountTypeMenu = new Menu(new string[] {"Personkonto - 0% Ränta", "Sparkonto - 1.25% Ränta","Pensionsfond - 4% Ränta"});
-            AccountTypeMenu.Output = "Välj typ av konto: ";
-            switch(AccountTypeMenu.UseMenu())
-            {
-                case 0:
-                    return 0;
-                case 1:
-                    return 1.25;
-                case 2:
-                    return 4;
-                default:
-                    return 0;
-            }
-        }
-
-        private int CurrencyType()
-        {
-            Menu CurrencyTypeMenu = new Menu(new string[] { "SEK", "USD" });
-            CurrencyTypeMenu.Output = "Välj valuta: ";
-            switch (CurrencyTypeMenu.UseMenu())
-            {
-                case 0:
-                    return 1; // SEK
-                case 1:
-                    return 2; // USD
-                default:
-                    return 1;
             }
         }
 

@@ -112,8 +112,16 @@ namespace Bank
                     {
                         int transferID = DataAccess.GetUserID(toEmail);
                         toID = DataAccess.GetAccountID(transferID);
-                        DataAccess.TransferToUser(fromID, toID, amount);
-                        ResetTransferData();
+                        if(toID != -1)
+                        {
+                            DataAccess.TransferToUser(fromID, toID, amount);
+                            ResetTransferData();
+                        }
+                        else
+                        {
+                            Warning("Mottagaren saknar konton att ta emot transaktionen med.");
+                        }
+                        
                     }
                     else
                     {

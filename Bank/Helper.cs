@@ -51,6 +51,38 @@ namespace Bank
             return true;
         }
 
+        public static double AccountType()
+        {
+            Menu AccountTypeMenu = new Menu(new string[] { "Personkonto - 0% Ränta", "Sparkonto - 1.25% Ränta", "Pensionsfond - 4% Ränta" });
+            AccountTypeMenu.Output = "Välj typ av konto: ";
+            switch (AccountTypeMenu.UseMenu())
+            {
+                case 0:
+                    return 0;
+                case 1:
+                    return 1.25;
+                case 2:
+                    return 4;
+                default:
+                    return 0;
+            }
+        }
+
+        public static int CurrencyType()
+        {
+            Menu CurrencyTypeMenu = new Menu(new string[] { "SEK", "USD" });
+            CurrencyTypeMenu.Output = "Välj valuta: ";
+            switch (CurrencyTypeMenu.UseMenu())
+            {
+                case 0:
+                    return 1; // SEK
+                case 1:
+                    return 2; // USD
+                default:
+                    return 1;
+            }
+        }
+
         public static void ResetUserData()
         {
             Person.id = -1;

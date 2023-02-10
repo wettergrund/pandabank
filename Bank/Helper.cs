@@ -11,7 +11,11 @@ namespace Bank
         // Formats the string to First letter being uppercase, and the rest in lowercase
         public static string FormatString(string input)
         {
-            return input.Substring(0, 1).ToUpper() + input.Substring(1).ToLower();
+            if (!string.IsNullOrWhiteSpace(input))
+            {
+                return input.Substring(0, 1).ToUpper() + input.Substring(1).ToLower();
+            }
+            return input;
         }
         // Prompts the user for a pincode, prints out * and then returns the password as a string
         public static string MaskPincodeData()

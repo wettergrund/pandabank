@@ -67,6 +67,10 @@ namespace Bank
         {
             menuItems[index] = item;
         }
+        public string GetMenuItem()
+        {
+            return menuItems[selectedIndex];
+        }
 
         // Change color of the menu 
         public ConsoleColor SetColor
@@ -102,7 +106,7 @@ namespace Bank
         }
 
         // A method that prints the menu when called
-        public void PrintSystem()
+        public void PrintMenu()
         {
             Console.Clear();
             // Prints out the menu items in the console, and puts brackets around the selected item.
@@ -229,7 +233,7 @@ namespace Bank
             bool usingMenu = true;
             do
             {
-                PrintSystem();
+                PrintMenu();
                 ConsoleKey userInput = menuInput.ReadInput(menuItems, selectedIndex); // Returns keyinput if valid
                 // Moves up and down in the array, depending on the input
                 // If user presses enter, breaks the loop and returns currenty selected index
@@ -249,7 +253,7 @@ namespace Bank
                 {
                     SelectIndex = menuInput.GetIndex();
                 }
-                PrintSystem(); // Prints the newly updated menu
+                PrintMenu(); // Prints the newly updated menu
             } while (usingMenu);
             return selectedIndex;
         }

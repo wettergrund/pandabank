@@ -6,6 +6,8 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlTypes;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,17 +24,19 @@ namespace Bank
                 return output.ToList();
             }
         }
-        public static List<BankTransaction> GetTransactions(int user_id)
+        public static List<BankTransactionModel> GetTransactions(int account_id)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankTransaction>($@"SELECT 
-                    t.name,
+                var output = cnn.Query<BankTransactionModel>($@"SELECT 
+                    t.name as transaction_name,
                     t.amount,
+                    t.from_account_id,
+                    t.to_account_id,
                     a.name as from_account_name,
-                    u.first_name,
+                    u.first_name as from_user,
                     c.name as to_account_name,
-                    r.first_name,
+                    r.first_name as to_user,
                     t.timestamp
                     FROM
                     bank_account a
@@ -41,7 +45,7 @@ namespace Bank
                     JOIN bank_account c ON c.id = t.to_account_id
                     JOIN bank_user r ON r.id = c.user_id
                     WHERE
-                    u.id = {user_id};", new DynamicParameters());
+                    a.id = {account_id} OR c.id = {account_id};", new DynamicParameters());
                 return output.ToList();
             }
         }
@@ -60,7 +64,6 @@ namespace Bank
             {
                 var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, id FROM bank_user WHERE is_locked = true", new DynamicParameters());
                 return output.ToList();
-
             }
         }
 
@@ -155,6 +158,8 @@ namespace Bank
                 cnn.Query($"INSERT INTO bank_user (first_name, last_name, pin_code, role_id, branch_id, email) VALUES ('{user.first_name}','{user.last_name}','{user.pin_code}','{user.role_id}','{user.branch_id}','{user.email}')", new DynamicParameters());
             }
             BankAccountModel newAcc = new BankAccountModel();
+            newAcc.interest_rate = Helper.AccountType();
+            newAcc.currency_id = Helper.CurrencyType();
             newAcc.name = "Personkonto";
             newAcc.balance = 0;
 
@@ -182,19 +187,25 @@ namespace Bank
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankAccountModel>($"Select id FROM bank_account WHERE user_id = '{userID}' ORDER BY id ASC", new DynamicParameters());
-                return output.ElementAt(0).id;
+                try
+                {
+                    var output = cnn.Query<BankAccountModel>($"Select id FROM bank_account WHERE user_id = '{userID}' AND EXISTS (SELECT id FROM bank_account) ORDER BY id ASC", new DynamicParameters());
+                    return output.ElementAt(0).id;
+                }
+                catch(NpgsqlException)
+                {
+                    return -1; // If user doesn't have any accounts, returns -1
+                }               
             }
         }
-        public static void TransferToUser(int from_account, int to_account, decimal amount)
+        public static void TransferToUser(BankTransactionModel transaction, string transferName)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query($@"
-                    UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{from_account}';
-                    UPDATE bank_account SET balance=balance + '{amount}' WHERE id='{to_account}';
-                    INSERT INTO bank_transaction (name, amount, from_account_id, to_account_id) VALUES ('Överföring', '{amount}','{from_account}', '{to_account}');");
-
+                cnn.Execute($@"
+                    UPDATE bank_account SET balance=balance - {transaction.amount} WHERE id={transaction.from_account_id};
+                    UPDATE bank_account SET balance=balance + {transaction.amount} WHERE id={transaction.to_account_id};", transaction);
+                cnn.Execute($"INSERT INTO bank_transaction (name, amount, from_account_id, to_account_id) VALUES ('{transferName}', @amount ,@from_account_id, @to_account_id);", transaction);
                 var transactionOutput = cnn.Query($@"
                     SELECT
                         u.first_name as Från_användare,
@@ -204,16 +215,15 @@ namespace Bank
                         TO_CHAR(t.timestamp, 'HH24:MI:SS') as Tid_på_överföringen
                     FROM
                         bank_account b
-                        JOIN bank_transaction t ON b.id = '{from_account}'
-                        JOIN bank_account c ON c.id = '{to_account}'
+                        JOIN bank_transaction t ON b.id = @from_account_id
+                        JOIN bank_account c ON c.id = @to_account_id
                         JOIN bank_user u ON u.id = b.user_id
                         JOIN bank_user r ON r.id = c.user_id
-                    ORDER BY t.timestamp DESC");
-                Console.Clear();
-                Console.WriteLine($"Summa: {amount} SEK");
+                    ORDER BY t.timestamp DESC", transaction);
+                    Console.Clear();
                 foreach (KeyValuePair<string, object> kvp in transactionOutput.ElementAt(0))
                 {
-                    Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " +  kvp.Value);
+                    Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " + kvp.Value);
                 }
                 Console.ReadKey();
             }
@@ -231,75 +241,6 @@ namespace Bank
             return isAdmin;
         }
 
-        public static void UpdateBalance(int fromAccountID, int toAccountID)
-        {
-            /* Method that move money from one account to another account, based on accounts DB ID */
-            decimal amount;
-            bool successfulInput;
-
-            do {
-                Console.Clear();
-                Console.WriteLine("Ange en summa");
-                string? enteredValue = Console.ReadLine();
-
-                enteredValue = enteredValue.Replace(",", ".");
-                var countPennies = enteredValue.Split('.');
-
-                successfulInput = decimal.TryParse(enteredValue, out amount);
-
-                if(amount < 0)
-                {
-                    Console.WriteLine("Negativa summor funkar ej.");
-                    Console.ReadKey();
-                    successfulInput = false;
-                }
-                if (countPennies.Length > 1 && countPennies[1].Length > 2)
-                {
-                    Console.WriteLine("Du kan max ange 99 ören");
-                    Console.ReadKey();
-
-                    successfulInput = false;
-                }
-            }
-            while (!successfulInput);
-
-            decimal fromBalance;
-            string fromAccountName;
-            decimal toBalance;
-            string toAccountName;
-
-            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
-            {
-                var output = cnn.Query<BankAccountModel>($"SELECT balance, name FROM bank_account WHERE id = '{fromAccountID}' ORDER BY name ASC, balance ASC", new DynamicParameters());
-                List<BankAccountModel> tempList = output.ToList();
-                fromAccountName = tempList[0].name;
-                fromBalance = Convert.ToDecimal(tempList[0].balance);
-
-                output = cnn.Query<BankAccountModel>($"SELECT balance, name FROM bank_account WHERE id = '{toAccountID}' ORDER BY name ASC, balance ASC", new DynamicParameters());
-                tempList = output.ToList();
-                toAccountName = tempList[0].name;
-                toBalance = Convert.ToDecimal(tempList[0].balance);
-            }
-
-            fromBalance -= amount;
-            toBalance += amount;
-
-            if (fromBalance < 0)
-            {
-                Console.WriteLine("Inte tillräckligt med pengar");
-                Console.ReadKey();
-                return;
-            }
-
-            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
-            {
-                cnn.Query<BankAccountModel>($"UPDATE bank_account SET balance = '{fromBalance}' WHERE id= '{fromAccountID}'", new DynamicParameters());
-                cnn.Query<BankAccountModel>($"UPDATE bank_account SET balance = '{toBalance}' WHERE id='{toAccountID}'", new DynamicParameters());
-            }
-
-            Console.WriteLine($"{amount}kr har förts över mellan [{fromAccountName}] till [{toAccountName}]");     
-            Console.ReadKey();
-        }
         public static void CreateUserAcc(BankAccountModel Account)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
@@ -311,7 +252,7 @@ namespace Bank
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, balance ) VALUES (@name, '{userId}',1, @balance )", Account);
+                cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, interest_rate, balance ) VALUES (@name, '{userId}',@currency_id, @interest_rate ,@balance )", Account);
             }
         }
         public static void UpdateLoanAmount(BankLoanModel loan,int userID)
@@ -330,14 +271,12 @@ namespace Bank
             }
         }
 
-        public static void withdrawAcc(int selectedAcc, decimal amount)
+        public static void WithdrawAcc(int selectedAcc, decimal amount)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 cnn.Execute($"UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{selectedAcc}'");
-
             }
-
         }
 
         public static void DeleteUserAcc(int delAccount)
@@ -350,19 +289,26 @@ namespace Bank
         }
         public static List<BankAccountModel> CurrencyExchange(int userID)
         {
+            // Ta emot currency_name/ID på pengarna och currency_name/ID på vad som det ska omvandlas till
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankAccountModel>(@$"SELECT  bank_account.id,bank_account.user_id, bank_account.name AS account_name, balance, bank_currency.name AS currency_name, bank_currency.exchange_rate AS test,CAST(balance*bank_currency.exchange_rate AS decimal(10,2)) AS SEK FROM  bank_account JOIN bank_currency ON bank_account.currency_id = bank_currency.id 
-WHERE bank_account.user_id={userID};");
+                var output = cnn.Query<BankAccountModel>($@"
+                SELECT
+                    bank_account.id,
+                    bank_account.user_id, 
+                    bank_account.name AS account_name, 
+                    balance, bank_currency.name AS currency_name, 
+                    bank_currency.exchange_rate AS test,
+                CAST
+                    (balance*bank_currency.exchange_rate AS decimal(10,2)) AS SEK 
+                FROM
+                    bank_account 
+                    JOIN bank_currency ON bank_account.currency_id = bank_currency.id
+                WHERE bank_account.user_id={userID};");
 
                 return output.ToList();
-
-             
             }
         }
-
-
-
         public static void LoginAttempt()
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
@@ -411,18 +357,29 @@ WHERE bank_account.user_id={userID};");
                 {
                     result = false;
                 }
-
             }
             return result;
         }
 
-
         private static string LoadConnectionString(string id = "Default")
         {
-            return ConfigurationManager.ConnectionStrings[id].ConnectionString;
+            try
+            {
+                using (IDbConnection cnn = new NpgsqlConnection(ConfigurationManager.ConnectionStrings[id].ConnectionString)) 
+                {
+                    cnn.Open();
+                    cnn.Close();
+                    return ConfigurationManager.ConnectionStrings[id].ConnectionString;
+                };
+            }
+            catch (Npgsql.PostgresException e)
+            {
+                return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
+            }
+            catch(System.Net.Sockets.SocketException e)
+            {
+                return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
+            }
         }
-
-
-
     }
 }

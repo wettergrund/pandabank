@@ -8,20 +8,13 @@ namespace Bank
         public void ShowMenu()
         {
             Menu MainMenu = new Menu(new string[] { "Logga in", "Stäng programmet" });
-            Login BankLogin = new Login(); // 
             bool showMenu = true;
             while (showMenu)
             {
-                if (Person.attempts == 3)
-                {
-                    showMenu = false;
-                    break;
-                }
                 switch (MainMenu.UseMenu())
                 {
                     case 0:
-
-                        if (BankLogin.LoginChecker())
+                        if (Login.LoginChecker())
                         {
                             ShowUserMenu();
                         }
@@ -32,75 +25,113 @@ namespace Bank
                 }
             }
         }
+
         // If user logs in succesfully - This will show different options that the user has
         // Checking balance to their accounts, transfers between their own accounts and logging out.
         private void ShowUserMenu()
         {
-            Menu UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto", "Se historik", "Logga ut" });
-
+            Menu UserMenu = new Menu(new string[] { "Konton", "Betala och Överföra", "Utgiftskollen", "Lån", "Logga ut" });           
             // Menu for admin user
             bool isAdmin = DataAccess.AdminAccess();
             if (isAdmin)
             {
-                UserMenu = new Menu(new string[] { "Konton/Saldon", "Överför pengar mellan konton", "Överför pengar mellan användare", "Skapa ett nytt konto", "Ta bort ett konto", "Se historik", "Logga ut", "Admin" });
+                UserMenu = new Menu(new string[] { "Konton", "Betala och Överföra", "Utgiftskollen", "Lån", "Logga ut", "Admin" });
             }
-
-            UserTransfers TransferToUser = new UserTransfers();
             bool showMenu = true;
-
             while (showMenu)
             {
-                switch (UserMenu.UseMenu())
+                int index = UserMenu.UseMenu();
+                if(UserMenu.GetMenuItem() == "Logga ut") 
                 {
-                    case 0:
-                        ShowAccountBalance();
-                        break;
-                    case 1:
-                        MoveMoney();
-                        break;
-                    case 2:
-                        TransferToUser.Transfer();
-                        break;
-                    case 3:
-                        CreateAccount();
-                        break;
-                    case 4:
-                        DeleteAccount();
-                        break;
-                    case 5:
-                        PrintTransaction(Person.id);
-                        break;
-                    case 6:
-                        showMenu = false;
-                        break;
-                    case 7:
-                        AdminMenu();
-                        break;
-
+                    break;
+                }
+                else
+                {
+                    MenuOptions(index);
                 }
             }
+        }
+
+        private void MenuOptions(int index)
+        {
+            Menu OptionsMenu = new Menu();
+            bool showMenu = true;
+            while (showMenu)
+            {
+                switch (index)
+                {
+                    case 0:
+                        OptionsMenu.MenuItems = new string[] { "Saldon", "Skapa konto", "Ta bort konto", "Gå tillbaka" };
+                        showMenu = AccountOptions(OptionsMenu.UseMenu());
+                        break;
+                    case 1:
+                        OptionsMenu.MenuItems = new string[] { "Överföringar", "Sätt in pengar", "Ta ut pengar", "Gå tillbaka" };
+                        showMenu = TransactionOptions(OptionsMenu.UseMenu());
+                        break;
+                    case 2:
+                        showMenu = TransactionLog();
+                        break;
+                    case 3:
+                        Console.WriteLine("Här kommer Mr.LEO's lånmetod vara :D");
+                        Console.ReadKey();
+                        break;
+                    case 4:
+                        showMenu = false;
+                        break;
+                    case 5:
+                        AdminMenu();
+                        break;
+                }
+            }
+        }
+
+        private bool AccountOptions(int index)
+        {
+            switch(index)
+            {
+                case 0:
+                    ShowAccountBalance();
+                    break;
+                case 1:
+                    CreateAccount();
+                    break;
+                case 2:
+                    DeleteAccount();
+                    break;
+                case 3:
+                    return false;
+            }
+            return true;
+        }
+
+        private bool TransactionOptions(int index)
+        {
+            UserTransfers BankTransactions = new UserTransfers();
+            switch (index)
+            {
+                case 0:
+                    BankTransactions.Transfer();
+                    break;
+                case 1:
+                    Deposit();
+                    break;
+                case 2:
+                    Withdraw();
+                    break;
+                case 3:
+                    return false;
+            }
+            return true;
         }
 
         // Calls the method to create a menu to show account balances
         public void ShowAccountBalance()
         {
             Menu BalanceMenu = new Menu();
-            BalanceMenu.CreateTransferMenu(Person.id);
+            BalanceMenu.CreateTransferMenu();
             BalanceMenu.UseMenu();
         }
-        // Method that allows user to send money between their own accounts
-        private void MoveMoney()
-        {
-            int selectedFromId = SelectAccount.FromID();
-            if (selectedFromId > 0)
-            {
-                int selectedToId = SelectAccount.ToID(selectedFromId);
-                if (selectedToId > 0)
-                {
-                    DataAccess.UpdateBalance(selectedFromId, selectedToId);
-                }
-            }
-        }
+
         //Method to convert currency
         public void CurrencyConvert()
         {
@@ -114,12 +145,11 @@ namespace Bank
 
         public void AdminMenu()
         {
-            Menu CreateAcoountMenu = new Menu(new string[] { "Skapa användare", "Lås upp användare", "Gå tillbaka" });
+            Menu CreateAccountMenu = new Menu(new string[] { "Skapa användare", "Lås upp användare", "Gå tillbaka" });
             bool showMenu = true;
             while (showMenu)
             {
-
-                switch (CreateAcoountMenu.UseMenu())
+                switch (CreateAccountMenu.UseMenu())
                 {
                     case 0:
                         // Get model of new user
@@ -132,9 +162,9 @@ namespace Bank
                             Console.Clear();
                             Console.CursorTop = 0;
                             Console.Write($"Ange förnamn: ");
-                            newUser.first_name = Console.ReadLine();
+                            newUser.first_name = Helper.FormatString(Console.ReadLine());
                             Console.Write($"Ange efternamn: ");
-                            newUser.last_name = Console.ReadLine();
+                            newUser.last_name = Helper.FormatString(Console.ReadLine());
 
                             // Error handling for incorrect name.
                             bool isValidName = newUser.first_name.Length > 0 && newUser.last_name.Length > 0 ? true : false;
@@ -146,7 +176,7 @@ namespace Bank
                             }
 
                             Console.Write($"Ange mail: ");
-                            newUser.email = Console.ReadLine();
+                            newUser.email = Helper.FormatString(Console.ReadLine());
 
                             // Error handling for incorrect email.
                             isValidEmail = regex.IsMatch(newUser.email);
@@ -159,18 +189,12 @@ namespace Bank
                         while (!isValidEmail);
 
                         newUser.branch_id = 3;
-
                         //Generate pin for user
                         Random random = new Random();
                         newUser.pin_code = Convert.ToString(random.Next(1000, 9999));
-
                         DataAccess.CreateUser(newUser);
                         Console.WriteLine($"\nAnvändare har skapats\nMail: {newUser.email}\nNamn: {newUser.first_name} {newUser.last_name}\nPinkod: {newUser.pin_code} ");
-
-
                         Console.ReadLine();
-
-
                         break;
                     case 1:
                         Menu LockedUsers = new Menu();
@@ -182,30 +206,25 @@ namespace Bank
                             break;
                         }
                         LockedUsers.UseMenu();
-
                         DataAccess.UnlockUser(userID);
-
-                        Console.WriteLine(userID);
-
+                        Console.WriteLine("Användarens konto är nu upplåst.");
                         Console.ReadLine();
                         break;
                     case 2:
                         Console.WriteLine("Gå tillbaka");
                         showMenu = false;
                         break;
-
-
                 }
             }
-
         }
-        //Method to creat a savings account
+
+        //Method to create an account
         private void CreateAccount()
         {
             BankAccountModel newAccount = new BankAccountModel();
             Console.Write("Kontonamn: ");
             string currencyName = "SEK;";
-            string accountName = Console.ReadLine();
+            string accountName = Helper.FormatString(Console.ReadLine());
             if (!Regex.IsMatch(accountName, @"^[a-öA-Ö]+$"))
             {
                 Console.WriteLine("Du kan bara skapa konton med bokstäver");
@@ -217,21 +236,19 @@ namespace Bank
                 bool success = true;
                 do
                 {
-                    newAccount.interest_rate = AccountType();
-                    newAccount.currency_id = CurrencyType();
-                    if (newAccount.currency_id == 2)
+                    newAccount.interest_rate = Helper.AccountType();
+                    newAccount.currency_id = Helper.CurrencyType();
+                    if(newAccount.currency_id == 2)
                     {
                         currencyName = "USD";
                     }
                     Console.WriteLine("Hur mycket pengar vill du sätta in?");
                     Console.Write(accountName + ": ");
 
-                    string? amount = Console.ReadLine();
-                    amount = amount.Replace(",", ".");
-                    var amountsplit = amount.Split(".");
+                    string? amount = Console.ReadLine().Replace(",", ".");
                     bool succAmount = decimal.TryParse(amount, out decimal accValue);
 
-                    if (amountsplit.Length > 1 && amountsplit[1].Length > 2)
+                    if (!Helper.CheckChange(amount))
                     {
                         Console.WriteLine("Du kan max ange 99 ören");
                         Console.ReadKey();
@@ -264,42 +281,10 @@ namespace Bank
             }
         }
 
-        private double AccountType()
-        {
-            Menu AccountTypeMenu = new Menu(new string[] { "Personkonto - 0% Ränta", "Sparkonto - 1.25% Ränta", "Pensionsfond - 4% Ränta" });
-            AccountTypeMenu.Output = "Välj typ av konto: ";
-            switch (AccountTypeMenu.UseMenu())
-            {
-                case 0:
-                    return 0;
-                case 1:
-                    return 1.25;
-                case 2:
-                    return 4;
-                default:
-                    return 0;
-            }
-        }
-
-        private int CurrencyType()
-        {
-            Menu CurrencyTypeMenu = new Menu(new string[] { "SEK", "USD" });
-            CurrencyTypeMenu.Output = "Välj valuta: ";
-            switch (CurrencyTypeMenu.UseMenu())
-            {
-                case 0:
-                    return 1; // SEK
-                case 1:
-                    return 2; // USD
-                default:
-                    return 1;
-            }
-        }
-
         private void DeleteAccount()
         {
             Menu AccountMenu = new Menu();
-            List<BankAccountModel> accounts = AccountMenu.CreateTransferMenu(Person.id);
+            List<BankAccountModel> accounts = AccountMenu.CreateTransferMenu();
             List<BankUserModel> pincheck = DataAccess.GetUserData(Person.id);
             int selectedAccount;
             while (true)
@@ -332,34 +317,51 @@ namespace Bank
                     {
                         Console.WriteLine("Fel pinkod");
                         Console.ReadKey();
-
                     }
                 }
             }
         }
 
-        public static void PrintTransaction(int userID)
+        public static bool TransactionLog()
         {
-            Menu transMenu = new Menu();
-            List<BankTransaction> userTrans = DataAccess.GetTransactions(userID);
-            for (int i = 0; i < userTrans.Count; i++)
+            Menu TransactionMenu = new Menu();
+            List<BankAccountModel> options = TransactionMenu.CreateTransferMenu();
+            int selectedRow;
+            while (true)
             {
-                Console.WriteLine("-------------------------");
-                Console.WriteLine("Namn:" + userTrans[i].name + " Summa:" + userTrans[i].amount + "\nFrån: " + userTrans[i].from_account_name + "\nTill: " + userTrans[i].to_account_name + "\nKlockslag: " + userTrans[i].timestamp);
-                Console.WriteLine("-------------------------");
+                TransactionMenu.Output = "Från: ";
+                selectedRow = TransactionMenu.UseMenu();
+                if (TransactionMenu.GetMenuItem() == "Gå tillbaka")
+                {
+                    return false;
+                }
+                else
+                {
+                    List<BankTransactionModel> userTrans = DataAccess.GetTransactions(options[selectedRow].id);
+                    for (int i = 0; i < userTrans.Count; i++)
+                    {
+                        userTrans[i].SetTransactionName(options[selectedRow].id);
+                        Console.WriteLine("-------------------------");
+                        Console.Write(userTrans[i].transaction_name + "\nSumma: ");
+                        Console.Write(userTrans[i].GetSignedAmount(options[selectedRow].id));
+                        Console.ResetColor();
+                        Console.WriteLine("\nFrån: " + userTrans[i].from_account_name + "\nTill: " + userTrans[i].to_account_name + "\nKlockslag: " + userTrans[i].timestamp);
+                        Console.WriteLine("-------------------------");
+                    }
+                    Console.ReadKey();
+                }
             }
-            Console.ReadKey();
-
         }
-        public void DepositMoney()
+        public void Deposit()
         {
-            Menu depositMenu = new Menu();
-            List<BankAccountModel> accounts = depositMenu.CreateTransferMenu(Person.id);
+            //Fixa så menu val ligger brevid varanda ?
+            Menu DepositMenu = new Menu();
+            List<BankAccountModel> accounts = DepositMenu.CreateTransferMenu();
             int selectedAccount;
-            decimal depositMoney = 0;
+            decimal depositMoney;
 
-            depositMenu.Output = "Välj konto.";
-            selectedAccount = depositMenu.UseMenu();
+            DepositMenu.Output = "Välj konto.";
+            selectedAccount = DepositMenu.UseMenu();
             decimal userInput;
             Console.WriteLine("Ange hur mycket du vill du vill sätta in.");
             decimal.TryParse(Console.ReadLine(), out userInput);
@@ -376,50 +378,37 @@ namespace Bank
                 Console.ReadKey();
             }
         }
-        public void withdrawMoney()
+        public void Withdraw()
         {
             decimal withdrawMoney = 0;
-            Menu withdrawMenu = new Menu();
-            List<BankAccountModel> accounts = withdrawMenu.CreateTransferMenu(Person.id);
-            withdrawMenu.Output = "Välj Konto";
-            int selectedAccount = withdrawMenu.UseMenu();
+            Menu WithdrawMenu = new Menu();
+            List<BankAccountModel> accounts = WithdrawMenu.CreateTransferMenu();
+            WithdrawMenu.Output = "Välj Konto";
+            int selectedAccount = WithdrawMenu.UseMenu();
             Menu withdrawAmount = new Menu(new string[] { "100:-", "200:-", "500:-", "1000:-", "Ange egen summa." });
             switch (withdrawAmount.UseMenu())
             {
 
                 case 0:
                     withdrawMoney = 100;
-                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
-                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
-                    Console.ReadKey();
                     break;
                 case 1:
                     withdrawMoney = 200;
-                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
-                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
-                    Console.ReadKey();
                     break;
                 case 2:
                     withdrawMoney = 500;
-                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
-                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
-                    Console.ReadKey();
                     break;
                 case 3:
                     withdrawMoney = 1000;
-                    DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
-                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
-                    Console.ReadKey(); break;
+                    break;
                 case 4:
                     decimal userInput;
                     Console.WriteLine("Ange hur mycket du vill du vill dra ut.");
+                    string amount = Console.ReadLine().Replace(",", ".");
                     decimal.TryParse(Console.ReadLine(), out userInput);
                     if (userInput > 0)
                     {
                         withdrawMoney = userInput;
-                        Console.WriteLine("Du tog ut " + userInput + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
-                        Console.ReadKey();
-                        DataAccess.withdrawAcc(accounts[selectedAccount].id, withdrawMoney);
                     }
                     else
                     {
@@ -429,94 +418,15 @@ namespace Bank
                     break;
                 case 5:
                     break;
-
-
+            }
+            if(withdrawMoney > 0)
+            {
+                DataAccess.WithdrawAcc(accounts[selectedAccount].id, withdrawMoney);
+                Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                Console.ReadKey();
             }
         }
-        public void loanIntrestRate()
-        {    // todo : fixa lån variable , 
-            //Get data for logged in user , used to get balance
-            BankLoanModel newLoan = new BankLoanModel();
-            decimal totalBalance = DataAccess.CheckTotalBalance(Person.id);
-            double loanAmountRate = 0;
-            decimal loanAmount = 0;
-            Console.WriteLine("Hur mycket vill du låna?");
-            Menu loanMenu = new Menu(new string[] { "1000:-", "10000:-", "100000:-", "Eget belopp", "Gå tillbaka" });
-            switch (loanMenu.UseMenu())
-            {
-                case 0:
-                    loanAmount = 1000;
-                    loanAmountRate = 30;
-                    newLoan.name = "Blancolån";
-                    break;
-                case 1:
-                    loanAmount = 10000;
-                    loanAmountRate = 15;
-                    newLoan.name = "Privatlån";
-                    break;
-                case 2:
-                    loanAmount = 100000;
-                    if (totalBalance * 5 >= loanAmount)
-                    {
-                        loanAmountRate = 7;
-                        newLoan.name = "Privatlån";
-                    }
-                    else
-                    {
-                        Console.WriteLine("Du har förlite pengar för att låna mängden pengar");
-                    }
-                    break;
-                case 3:
-                    decimal userLoan;
-                    Console.Write("Ange belop du vill låna:");
-                    decimal.TryParse(Console.ReadLine(), out userLoan);
-                    loanAmount = userLoan;
-                    if (totalBalance * 5 >= loanAmount)
-                    {
-                        loanAmountRate = 5;
-                        newLoan.name = "Privatlån";
-                    }
-                    else
-                    {
-                        Console.WriteLine("Du har för lite pengar för att låna mängden pengar");
-                    }
-                    break;
-                case 4:
-                    //Gå tillbaka
-                    break;
-            }
-            if (loanAmount > 0)
-            {
-                newLoan.amount = loanAmount;
-                newLoan.interest_rate = loanAmountRate;
-                List<BankUserModel> pincheck = DataAccess.GetUserData(Person.id);
-                Menu confirm = new Menu(new string[] { "Ja", "Nej" });
-                Console.WriteLine("Du har tagit ett " + newLoan.name + "på " + loanAmount + ":- med en räta på " + loanAmountRate + "%.");
-                confirm.Output = "Du har tagit ett " + newLoan.name + " på " + loanAmount + ":- med en räta på " + loanAmountRate + "%.\nGodkänner du detta lån?";
-                switch (confirm.UseMenu())
-                {
-                    case 0:
-                        Console.Write("Skriv in din pinkod för att bekräfta lånet:");
-                        string pincode = Helper.MaskPincodeData();
-                        if (pincode == pincheck.First().pin_code)
-                        {
-                            DataAccess.UpdateLoanAmount(newLoan, Person.id);
-                            Console.WriteLine("Lån godkänt. Pengarna sätts in inom 5 arbets dagar.");
-                            Console.ReadKey();
-                            break;
-                        }
-                        else
-                        {
-                            Console.WriteLine("\nFel pinkod,du sickas tillbaka till menyvalen.");
-                            Console.ReadKey();
-                        }
-                        break;
-                    case 1:
-                        break;
-                }
-
-            }
-        }
+        
     }
 
 }

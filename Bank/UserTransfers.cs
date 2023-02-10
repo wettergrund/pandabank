@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Bank
 {
-    internal class UserTransfers
+    public class UserTransfers
     {
-        readonly Menu TransferMenu = new Menu(new string[] { "Välj konto:", "Till:", "Summa:", "Överför", "Gå tillbaka" });
-        int fromID, toID;
+        readonly static Menu TransferMenu = new Menu(new string[] { "Välj konto:", "Till:", "Summa:", "Överför", "Gå tillbaka" });
+        BankTransactionModel transaction = new BankTransactionModel();
         string? toEmail;
-        decimal amount;
+        int selectedAccount;
         public void Transfer()
         {
             ResetTransferData();
@@ -27,7 +27,7 @@ namespace Bank
                         break;
                     case 1:
                         ResetRow("Till:");
-                        ToUser();
+                        SelectTransferType();
                         break;
                     case 2:
                         ResetRow("Summa:");
@@ -46,22 +46,65 @@ namespace Bank
         private void FromAccount()
         {
             Menu fromAccountMenu = new Menu();
-            List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu(Person.id);
+            List<BankAccountModel> options = fromAccountMenu.CreateTransferMenu(selectedAccount);
             int selectedRow;
             while (true)
             {
                 fromAccountMenu.Output = "Från: ";
                 selectedRow = fromAccountMenu.UseMenu();
-                if (selectedRow == fromAccountMenu.GetMenu().Length - 1)
+                if (fromAccountMenu.GetMenuItem() == "Gå tillbaka")
                 {
                     break;
                 }
                 else
                 {
                     TransferMenu.SetMenuItem("Valt konto: " + options[selectedRow].name + " - " + options[selectedRow].balance, 0);
-                    fromID = options[selectedRow].id;
+                    transaction.from_account_id = options[selectedRow].id;
+                    selectedAccount = options[selectedRow].id;
                     break;
                 }
+            }
+        }
+
+        private void ToAccount()
+        {
+            Menu toAccountMenu = new Menu();
+            List<BankAccountModel> options = toAccountMenu.CreateTransferMenu(selectedAccount);
+            int selectedRow;
+            while (true)
+            {
+                toAccountMenu.Output = "Till: ";
+                selectedRow = toAccountMenu.UseMenu();
+                if (toAccountMenu.GetMenuItem() == "Gå tillbaka")
+                {
+                    break;
+                }
+                else
+                {
+                    TransferMenu.SetMenuItem("Valt konto: " + options[selectedRow].name + " - " + options[selectedRow].balance, 1);
+                    transaction.to_account_id = options[selectedRow].id;
+                    selectedAccount = options[selectedRow].id;
+                    toEmail = "";
+                    break;
+                }
+            }
+        }
+
+        private void SelectTransferType()
+        {
+            Menu TransferTypeMenu = new Menu(new string[] {"Egna konton", "Annan användare"});
+            TransferTypeMenu.Output = "Välj typen av överföring.";
+            switch(TransferTypeMenu.UseMenu())
+            {
+                case 0:
+                    ToAccount();
+                    break;
+                case 1:
+                    TransferMenu.PrintMenu();
+                    ToUser();
+                    break;
+                case 2:
+                    break;
             }
         }
         // Prompts user to enter the recieving account, and then checks if user exists
@@ -73,52 +116,65 @@ namespace Bank
                 TransferMenu.MoveCursorRight();
                 isEmail = ValidateEmail(Console.ReadLine());
             }
+            if (Person.id == DataAccess.GetUserID(toEmail))
+            {
+                Console.WriteLine("Välj en annan användare än dig själv.");
+                toEmail = "";
+                Console.ReadKey();
+            }
+            else
+            {
+                int transferID = DataAccess.GetUserID(toEmail);
+                if(transferID > 0)
+                {
+                    transaction.to_account_id = DataAccess.GetAccountID(transferID);
+                }
+                else
+                {
+                    Warning("Mottagaren saknar konton att ta emot transaktionen med.");
+                }
+            }
         }
         // Prompts user to enter the amount,
         // then checks if their chosen account has enough funds to cover the transaction
         private void GetAmountToTransfer()
         {
             TransferMenu.MoveCursorRight();
-            string answer = Console.ReadLine();
-            bool success = decimal.TryParse(answer, out amount);
-            if (success)
+            string answer = Console.ReadLine().Replace(",", ".");
+            bool success = decimal.TryParse(answer, out decimal amount);
+            if (success && Helper.CheckChange(answer))
             {
-                bool enoughFunds = DataAccess.CheckAccountFunds(fromID, amount);
+                bool enoughFunds = DataAccess.CheckAccountFunds(transaction.from_account_id, amount);
                 if (enoughFunds)
                 {
+                    transaction.amount = amount;
                     TransferMenu.SetMenuItem("Summa:" + amount.ToString(), 2);
                 }
                 else
                 {
-                    amount = 0;
+                    transaction.amount = 0;
                     Warning("Inte tillräcklig täckning på kontot. Försök igen.");
                 }
+            }
+            else
+            {
+                Warning("Ange endast siffror och ej fler än två decimaler.");
             }
         }
         // If all data input is valid, the transaction will go through
         private void Transaction()
         {
-            if (amount > 0 && !string.IsNullOrWhiteSpace(toEmail) && fromID > -1)
+            if (transaction.amount > 0 && transaction.from_account_id > -1 && transaction.to_account_id > -1)
             {
-                if (Person.id != DataAccess.GetUserID(toEmail))
+                // Checks that all the required variables have valid values
+                if (CheckPincode())
                 {
-                    // Checks that all the required variables have valid values
-                    if (CheckPincode())
-                    {
-                        int transferID = DataAccess.GetUserID(toEmail);
-                        toID = DataAccess.GetAccountID(transferID);
-                        DataAccess.TransferToUser(fromID, toID, amount);
-                        ResetTransferData();
-                    }
-                    else
-                    {
-                        Console.WriteLine("Fel pinkod. Försök igen!");
-                        Console.ReadKey();
-                    }
+                    DataAccess.TransferToUser(transaction, "Kontoöverföring");
+                    ResetTransferData();
                 }
                 else
                 {
-                    Console.WriteLine("Välj en annan användare än dig själv.");
+                    Console.WriteLine("Fel pinkod. Försök igen!");
                     Console.ReadKey();
                 }
             }
@@ -127,7 +183,6 @@ namespace Bank
                 Console.WriteLine("Dubbelkolla så att all data ovan är ifyllt.");
                 Console.ReadKey();
             }
-            
         }
         // Promps the user to enter their pincode, and then checks if is correct
         private bool CheckPincode()
@@ -150,19 +205,20 @@ namespace Bank
         // Resets all the data input
         private void ResetTransferData()
         {
-            fromID = 0;
+            transaction.from_account_id = -1;
+            transaction.to_account_id = -1;
             toEmail = "";
-            amount = 0;
+            transaction.amount = -1;
             TransferMenu.SetMenuItem("Välj Konto:", 0);
             TransferMenu.SetMenuItem("Till:", 1);
             TransferMenu.SetMenuItem("Summa:", 2);
-            TransferMenu.PrintSystem();
+            TransferMenu.PrintMenu();
         }
         // Resets a specific row
         private void ResetRow(string row)
         {
             TransferMenu.SetMenuItem(row, TransferMenu.SelectIndex);
-            TransferMenu.PrintSystem();
+            TransferMenu.PrintMenu();
         }
         //Moves the cursor to the bottom, prints the given error/warning message to the user
         //Resets the menu output and moves the cursor back
@@ -195,12 +251,12 @@ namespace Bank
             {
                 toEmail = "";
                 Warning("Otillåtna tecken. Försök igen.");
-                TransferMenu.PrintSystem();
+                TransferMenu.PrintMenu();
             }
             return true;
         }
         //Checks if password only contains integers
-        public static bool ValidatePincode(string pincode)
+        public bool ValidatePincode(string pincode)
         {
             bool success = int.TryParse(pincode, out int result);
             if (success && pincode.Length <= 4)

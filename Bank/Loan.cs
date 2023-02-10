@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Bank
 {
-    internal class Loan
+    public class Loan
     {
-        public void loanIntrestRate()
+        public bool loanIntrestRate()
         {    // todo : fixa lån variable , 
             //Get data for logged in user , used to get balance
             BankLoanModel newLoan = new BankLoanModel();
@@ -57,8 +57,7 @@ namespace Bank
                     }
                     break;
                 case 4:
-                    //Gå tillbaka
-                    break;
+                    return false;
             }
             if (loanAmount > 0)
             {
@@ -76,9 +75,9 @@ namespace Bank
                         if (pincode == pincheck.First().pin_code)
                         {
                             DataAccess.UpdateLoanAmount(newLoan, Person.id);
-                            Console.WriteLine("Lån godkänt. Pengarna sätts in inom 5 arbets dagar.");
+                            Console.WriteLine("\nLån godkänt. Pengarna sätts in inom 5 arbets dagar.");
                             Console.ReadKey();
-                            break;
+                            return false;
                         }
                         else
                         {
@@ -89,8 +88,8 @@ namespace Bank
                     case 1:
                         break;
                 }
-
             }
+                return true;
         }
     }
 }

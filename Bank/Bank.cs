@@ -53,7 +53,7 @@ namespace Bank
         }
 
         private void MenuOptions(int index)
-        {
+        {   Loan Loan = new Loan();
             Menu OptionsMenu = new Menu();
             bool showMenu = true;
             while (showMenu)
@@ -72,8 +72,7 @@ namespace Bank
                         showMenu = TransactionLog();
                         break;
                     case 3:
-                        Console.WriteLine("Här kommer Mr.LEO's lånmetod vara :D");
-                        Console.ReadKey();
+                       showMenu = Loan.loanIntrestRate();
                         break;
                     case 4:
                         showMenu = false;

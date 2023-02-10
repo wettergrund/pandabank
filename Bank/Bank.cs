@@ -62,31 +62,73 @@ namespace Bank
         private void MenuOptions(int index)
         {
             Menu OptionsMenu = new Menu();
+            bool showMenu = true;
+            while (showMenu)
+            {
+                switch (index)
+                {
+                    case 0:
+                        OptionsMenu.MenuItems = new string[] { "Saldon", "Skapa konto", "Ta bort konto", "Gå tillbaka" };
+                        showMenu = AccountOptions(OptionsMenu.UseMenu());
+                        break;
+                    case 1:
+                        OptionsMenu.MenuItems = new string[] { "Överföringar", "Sätt in pengar", "Ta ut pengar", "Gå tillbaka" };
+                        showMenu = TransactionOptions(OptionsMenu.UseMenu());
+                        break;
+                    case 2:
+                        showMenu = TransactionLog();
+                        break;
+                    case 3:
+                        Console.WriteLine("Här kommer Mr.LEO's lånmetod vara :D");
+                        Console.ReadKey();
+                        break;
+                    case 4:
+                        showMenu = false;
+                        break;
+                    case 5:
+                        AdminMenu();
+                        break;
+                }
+            }
+        }
+
+        private bool AccountOptions(int index)
+        {
+            switch(index)
+            {
+                case 0:
+                    ShowAccountBalance();
+                    break;
+                case 1:
+                    CreateAccount();
+                    break;
+                case 2:
+                    DeleteAccount();
+                    break;
+                case 3:
+                    return false;
+            }
+            return true;
+        }
+
+        private bool TransactionOptions(int index)
+        {
+            UserTransfers BankTransactions = new UserTransfers();
             switch (index)
             {
                 case 0:
-                    OptionsMenu.MenuItems = new string[] { "Saldon", "Skapa konto", "Ta bort konto", "Gå tillbaka" };
-                    OptionsMenu.UseMenu();
+                    BankTransactions.Transfer();
                     break;
                 case 1:
-                    UserTransfers transfers = new UserTransfers();
-                    transfers.Transfer();
-                    //OptionsMenu.MenuItems = new string[] { "Överföringar", "Sätt in pengar", "Ta ut pengar", "Gå tillbaka" };
-                    //OptionsMenu.UseMenu();
+                    Deposit();
                     break;
                 case 2:
-                    TransactionLog();
+                    Withdraw();
                     break;
                 case 3:
-                    Console.WriteLine("Här kommer Mr.LEO's lånmetod vara :D");
-                    Console.ReadKey();
-                    break;
-                case 4:
-                    break;
-                case 5:
-                    AdminMenu();
-                    break;
+                    return false;
             }
+            return true;
         }
 
         // Calls the method to create a menu to show account balances
@@ -96,19 +138,7 @@ namespace Bank
             BalanceMenu.CreateTransferMenu();
             BalanceMenu.UseMenu();
         }
-        // Method that allows user to send money between their own accounts
-        private void MoveMoney()
-        {
-            int selectedFromId = SelectAccount.FromID();
-            if (selectedFromId > 0)
-            {
-                int selectedToId = SelectAccount.ToID(selectedFromId);
-                if (selectedToId > 0)
-                {
-                    DataAccess.UpdateBalance(selectedFromId, selectedToId);
-                }
-            }
-        }
+
         //Method to convert currency
         public void CurrencyConvert()
         {
@@ -299,18 +329,35 @@ namespace Bank
             }
         }
 
-        public static void TransactionLog()
+        public static bool TransactionLog()
         {
             Menu TransactionMenu = new Menu();
-            List<BankTransaction> userTrans = DataAccess.GetTransactions(Person.id);
-            for (int i = 0; i < userTrans.Count; i++)
+            List<BankAccountModel> options = TransactionMenu.CreateTransferMenu();
+            int selectedRow;
+            while (true)
             {
-                Console.WriteLine("-------------------------");
-                Console.WriteLine(userTrans[i].transaction_name + " Summa:" + userTrans[i].amount + "\nFrån: " + userTrans[i].from_account_name + "\nTill: " + userTrans[i].to_account_name + "\nKlockslag: " + userTrans[i].timestamp);
-                Console.WriteLine("-------------------------");
+                TransactionMenu.Output = "Från: ";
+                selectedRow = TransactionMenu.UseMenu();
+                if (TransactionMenu.GetMenuItem() == "Gå tillbaka")
+                {
+                    return false;
+                }
+                else
+                {
+                    List<BankTransactionModel> userTrans = DataAccess.GetTransactions(options[selectedRow].id);
+                    for (int i = 0; i < userTrans.Count; i++)
+                    {
+                        userTrans[i].SetTransactionName(options[selectedRow].id);
+                        Console.WriteLine("-------------------------");
+                        Console.Write(userTrans[i].transaction_name + "\nSumma: ");
+                        Console.Write(userTrans[i].GetSignedAmount(options[selectedRow].id));
+                        Console.ResetColor();
+                        Console.WriteLine("\nFrån: " + userTrans[i].from_account_name + "\nTill: " + userTrans[i].to_account_name + "\nKlockslag: " + userTrans[i].timestamp);
+                        Console.WriteLine("-------------------------");
+                    }
+                    Console.ReadKey();
+                }
             }
-            Console.ReadKey();
-
         }
         public void Deposit()
         {

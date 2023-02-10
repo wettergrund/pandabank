@@ -40,7 +40,7 @@ namespace Bank
             while (isEmail)
             {
                 LoginMenu.MoveCursorRight();
-                isEmail = ValidateEmail(Console.ReadLine());
+                isEmail = ValidateEmail(Console.ReadLine().Trim());
             }
         }
         // Prompts the user to enter their pincode and checks if its valid
@@ -65,7 +65,7 @@ namespace Bank
                 if (!pinCheck)
                 {
                     DataAccess.LoginAttempt();
-                    if (LockedAccount())
+                    if (!LockedAccount())
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Konto låst, kontakta banken för att få det upplåst");

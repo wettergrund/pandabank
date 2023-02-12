@@ -351,6 +351,14 @@ namespace Bank
                         {
                             Console.WriteLine("Från: " + transaction.from_account_name + "\nTill: " + transaction.to_account_name);
                         }
+                        else if (transaction.transaction_name == "Uttag")
+                        {
+                            Console.WriteLine("Från: " + transaction.from_account_name);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Till: " + transaction.to_account_name);
+                        }
                         Console.WriteLine("Datum: " + transaction.timestamp);
                         Console.WriteLine("-------------------------");
                     }

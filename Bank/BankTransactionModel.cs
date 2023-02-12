@@ -19,6 +19,7 @@ namespace Bank
         public string to_account_name { get;set; }
         public decimal amount { get; set; }
         public string timestamp { get; set; }
+        public string currency { get; set; }
 
         public string GetSignedAmount(int account_id)
         {

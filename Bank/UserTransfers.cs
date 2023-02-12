@@ -66,6 +66,24 @@ namespace Bank
             }
         }
 
+        private void SelectTransferType()
+        {
+            Menu TransferTypeMenu = new Menu(new string[] { "Egna konton", "Annan användare" });
+            TransferTypeMenu.Output = "Välj typen av överföring.";
+            switch (TransferTypeMenu.UseMenu())
+            {
+                case 0:
+                    ToAccount();
+                    break;
+                case 1:
+                    TransferMenu.PrintMenu();
+                    ToUser();
+                    break;
+                case 2:
+                    break;
+            }
+        }
+
         private void ToAccount()
         {
             Menu toAccountMenu = new Menu();
@@ -90,23 +108,6 @@ namespace Bank
             }
         }
 
-        private void SelectTransferType()
-        {
-            Menu TransferTypeMenu = new Menu(new string[] {"Egna konton", "Annan användare"});
-            TransferTypeMenu.Output = "Välj typen av överföring.";
-            switch(TransferTypeMenu.UseMenu())
-            {
-                case 0:
-                    ToAccount();
-                    break;
-                case 1:
-                    TransferMenu.PrintMenu();
-                    ToUser();
-                    break;
-                case 2:
-                    break;
-            }
-        }
         // Prompts user to enter the recieving account, and then checks if user exists
         private void ToUser()
         {
@@ -244,6 +245,8 @@ namespace Bank
                 else
                 {
                     TransferMenu.SetMenuItem("Till:", TransferMenu.SelectIndex);
+                    TransferMenu.PrintMenu();
+                    toEmail = "";
                     Warning("Skriv in en existerande användare!");
                 }
             }

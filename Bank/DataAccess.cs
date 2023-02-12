@@ -28,7 +28,7 @@ namespace Bank
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankTransactionModel>($@"SELECT 
+                var output = cnn.Query<BankTransactionModel>($@"SELECT DISTINCT ON(t.timestamp)
                     t.name as transaction_name,
                     t.amount,
                     t.from_account_id,
@@ -41,8 +41,8 @@ namespace Bank
                     FROM
                     bank_account a
                     JOIN bank_user u ON u.id = a.user_id
-                    JOIN bank_transaction t ON a.id = t.from_account_id
-                    JOIN bank_account c ON c.id = t.to_account_id
+                    JOIN bank_transaction t ON a.id = t.from_account_id OR a.id = t.to_account_id
+                    JOIN bank_account c ON c.id = t.to_account_id OR c.id = t.from_account_id
                     JOIN bank_user r ON r.id = c.user_id
                     WHERE
                     a.id = {account_id} OR c.id = {account_id};", new DynamicParameters());
@@ -53,7 +53,7 @@ namespace Bank
         {
             using(IDbConnection cnn =new NpgsqlConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, pin_code , role_id , branch_id FROM bank_user WHERE id = '{user_id}'", new DynamicParameters());
+                var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, email, pin_code, role_id , branch_id FROM bank_user WHERE id = '{user_id}'", new DynamicParameters());
                 return output.ToList();
             }
         }
@@ -158,7 +158,7 @@ namespace Bank
                 cnn.Query($"INSERT INTO bank_user (first_name, last_name, pin_code, role_id, branch_id, email) VALUES ('{user.first_name}','{user.last_name}','{user.pin_code}','{user.role_id}','{user.branch_id}','{user.email}')", new DynamicParameters());
             }
             BankAccountModel newAcc = new BankAccountModel();
-            newAcc.interest_rate = Helper.AccountType();
+            newAcc.interest_rate = 0;
             newAcc.currency_id = Helper.CurrencyType();
             newAcc.name = "Personkonto";
             newAcc.balance = 0;
@@ -255,6 +255,7 @@ namespace Bank
                 cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, interest_rate, balance ) VALUES (@name, '{userId}',@currency_id, @interest_rate ,@balance )", Account);
             }
         }
+
         public static void UpdateLoanAmount(BankLoanModel loan,int userID)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
@@ -262,20 +263,23 @@ namespace Bank
                 cnn.Query($"INSERT INTO bank_loan (name,interest_rate,user_id,amount) VALUES (@name,@interest_rate,'{userID}', @amount)", loan);
             }
         }
-        public static void DepositAcc(int selectedAcc, decimal amount)
+        public static void Deposit(int selectedAcc, decimal amount)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                cnn.Execute($"UPDATE bank_account SET balance=balance + '{amount}' WHERE id='{selectedAcc}'");
-
+                cnn.Execute($@"
+                UPDATE bank_account SET balance=balance + '{amount}' WHERE id='{selectedAcc}';
+                INSERT INTO bank_transaction (name, amount, to_account_id) VALUES ('Insättning', '{amount}' ,'{selectedAcc}');");
             }
         }
 
-        public static void WithdrawAcc(int selectedAcc, decimal amount)
+        public static void Withdraw(int selectedAcc, decimal amount)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
-                cnn.Execute($"UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{selectedAcc}'");
+                cnn.Execute($@"
+                UPDATE bank_account SET balance=balance - '{amount}' WHERE id='{selectedAcc}';
+                INSERT INTO bank_transaction (name, amount, from_account_id) VALUES ('Uttag', '{amount}' ,'{selectedAcc}');");
             }
         }
 
@@ -372,11 +376,15 @@ namespace Bank
                     return ConfigurationManager.ConnectionStrings[id].ConnectionString;
                 };
             }
-            catch (Npgsql.PostgresException e)
+            catch (Npgsql.PostgresException)
             {
                 return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
             }
-            catch(System.Net.Sockets.SocketException e)
+            catch(System.Net.Sockets.SocketException)
+            {
+                return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
+            }
+            catch(System.NullReferenceException)
             {
                 return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
             }

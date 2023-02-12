@@ -78,7 +78,7 @@ namespace Bank
                         showMenu = false;
                         break;
                     case 5:
-                        AdminMenu();
+                        showMenu = AdminMenu();
                         break;
                 }
             }
@@ -102,7 +102,9 @@ namespace Bank
             }
             return true;
         }
-
+        //CaseManager case = new CaseManager();
+        //case.size = array.length
+        //case(Transfer(), Deposit(), Withdraw())
         private bool TransactionOptions(int index)
         {
             UserTransfers BankTransactions = new UserTransfers();
@@ -142,7 +144,7 @@ namespace Bank
             }
         }
 
-        public void AdminMenu()
+        public bool AdminMenu()
         {
             Menu CreateAccountMenu = new Menu(new string[] { "Skapa användare", "Lås upp användare", "Gå tillbaka" });
             bool showMenu = true;
@@ -215,6 +217,7 @@ namespace Bank
                         break;
                 }
             }
+            return false;
         }
 
         //Method to create an account
@@ -336,15 +339,15 @@ namespace Bank
                 }
                 else
                 {
-                    List<BankTransactionModel> userTrans = DataAccess.GetTransactions(options[selectedRow].id);
-                    for (int i = 0; i < userTrans.Count; i++)
+                    List<BankTransactionModel> transactions = DataAccess.GetTransactions(options[selectedRow].id);
+                    foreach(var transaction in transactions)
                     {
-                        userTrans[i].SetTransactionName(options[selectedRow].id);
+                        transaction.SetTransactionName(options[selectedRow].id);
                         Console.WriteLine("-------------------------");
-                        Console.Write(userTrans[i].transaction_name + "\nSumma: ");
-                        Console.Write(userTrans[i].GetSignedAmount(options[selectedRow].id));
+                        Console.Write(transaction.transaction_name + "\nSumma: ");
+                        Console.Write(transaction.GetSignedAmount(options[selectedRow].id));
                         Console.ResetColor();
-                        Console.WriteLine("\nFrån: " + userTrans[i].from_account_name + "\nTill: " + userTrans[i].to_account_name + "\nKlockslag: " + userTrans[i].timestamp);
+                        Console.WriteLine("\nFrån: " + transaction.from_account_name + "\nTill: " + transaction.to_account_name + "\nDatum: " + transaction.timestamp);
                         Console.WriteLine("-------------------------");
                     }
                     Console.ReadKey();
@@ -361,21 +364,33 @@ namespace Bank
 
             DepositMenu.Output = "Välj konto.";
             selectedAccount = DepositMenu.UseMenu();
-            decimal userInput;
-            Console.WriteLine("Ange hur mycket du vill du vill sätta in.");
-            decimal.TryParse(Console.ReadLine(), out userInput);
-            if (userInput > 0)
+            if(selectedAccount != DepositMenu.MenuItems.Length -1) 
             {
-                depositMoney = userInput;
-                Console.WriteLine("Du har satt in " + userInput + ":- på konto [" + accounts[selectedAccount].name + "]");
-                Console.ReadKey();
-                DataAccess.DepositAcc(accounts[selectedAccount].id, depositMoney);
+                Console.WriteLine("Ange hur mycket du vill du vill sätta in.");
+                string amount = Console.ReadLine().Replace(",",".");
+                bool success = decimal.TryParse(amount, out decimal userInput);
+                if(success && Helper.CheckChange(amount))
+                {
+                    if (userInput > 0)
+                    {
+                        depositMoney = userInput;
+                        Console.WriteLine("Du har satt in " + userInput + ":- på konto [" + accounts[selectedAccount].name + "]");
+                        Console.ReadKey();
+                        DataAccess.Deposit(accounts[selectedAccount].id, depositMoney);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ogiltigt belopp");
+                        Console.ReadKey();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Någonting gick fel. Försök igen.");
+                    Console.ReadKey();
+                }
             }
-            else
-            {
-                Console.WriteLine("Ogiltigt belopp");
-                Console.ReadKey();
-            }
+            
         }
         public void Withdraw()
         {
@@ -384,45 +399,54 @@ namespace Bank
             List<BankAccountModel> accounts = WithdrawMenu.CreateTransferMenu();
             WithdrawMenu.Output = "Välj Konto";
             int selectedAccount = WithdrawMenu.UseMenu();
-            Menu withdrawAmount = new Menu(new string[] { "100:-", "200:-", "500:-", "1000:-", "Ange egen summa." });
-            switch (withdrawAmount.UseMenu())
+            if(selectedAccount != WithdrawMenu.MenuItems.Length -1)
             {
-
-                case 0:
-                    withdrawMoney = 100;
-                    break;
-                case 1:
-                    withdrawMoney = 200;
-                    break;
-                case 2:
-                    withdrawMoney = 500;
-                    break;
-                case 3:
-                    withdrawMoney = 1000;
-                    break;
-                case 4:
-                    decimal userInput;
-                    Console.WriteLine("Ange hur mycket du vill du vill dra ut.");
-                    string amount = Console.ReadLine().Replace(",", ".");
-                    decimal.TryParse(Console.ReadLine(), out userInput);
-                    if (userInput > 0)
-                    {
-                        withdrawMoney = userInput;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Ogiltigt belopp");
-                        Console.ReadKey();
-                    }
-                    break;
-                case 5:
-                    break;
-            }
-            if(withdrawMoney > 0)
-            {
-                DataAccess.WithdrawAcc(accounts[selectedAccount].id, withdrawMoney);
-                Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
-                Console.ReadKey();
+                Menu withdrawAmount = new Menu(new string[] { "100:-", "200:-", "500:-", "1000:-", "Ange egen summa." });
+                switch (withdrawAmount.UseMenu())
+                {
+                    case 0:
+                        withdrawMoney = 100;
+                        break;
+                    case 1:
+                        withdrawMoney = 200;
+                        break;
+                    case 2:
+                        withdrawMoney = 500;
+                        break;
+                    case 3:
+                        withdrawMoney = 1000;
+                        break;
+                    case 4:
+                        Console.WriteLine("Ange hur mycket du vill du vill dra ut.");
+                        string amount = Console.ReadLine().Replace(",", ".");
+                        bool success = decimal.TryParse(amount, out decimal userInput);
+                        if(success && Helper.CheckChange(amount))
+                        {
+                            if (userInput > 0)
+                            {
+                                withdrawMoney = userInput;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Ogiltigt belopp");
+                                Console.ReadKey();
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Någonting gick fel. Försök igen.");
+                            Console.ReadKey();
+                        }
+                        break;
+                    case 5:
+                        break;
+                }
+                if (withdrawMoney > 0)
+                {
+                    DataAccess.Withdraw(accounts[selectedAccount].id, withdrawMoney);
+                    Console.WriteLine("Du tog ut " + withdrawMoney + ":- från [" + accounts[selectedAccount].name + "]\nTryck valfri knapp för fortsätta");
+                    Console.ReadKey();
+                }
             }
         }
         

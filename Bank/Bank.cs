@@ -1,11 +1,4 @@
-﻿using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace Bank
 {
@@ -60,7 +53,7 @@ namespace Bank
         }
 
         private void MenuOptions(int index)
-        {
+        {   Loan Loan = new Loan();
             Menu OptionsMenu = new Menu();
             bool showMenu = true;
             while (showMenu)
@@ -79,9 +72,7 @@ namespace Bank
                         showMenu = TransactionLog();
                         break;
                     case 3:
-                        Console.WriteLine("Här kommer Mr.LEO's lånmetod vara :D");
-                        Console.ReadKey();
-                        showMenu = false;
+                       showMenu = Loan.loanIntrestRate();
                         break;
                     case 4:
                         showMenu = false;
@@ -209,7 +200,7 @@ namespace Bank
                     case 1:
                         Menu LockedUsers = new Menu();
                         int userID = LockedUsers.CreateLockedMenu();
-                        if(userID == -1)
+                        if (userID == -1)
                         {
                             Console.WriteLine("Ingen användare är låst");
                             Console.ReadLine();
@@ -326,7 +317,7 @@ namespace Bank
                     }
                     else
                     {
-                        Console.WriteLine("Fel pinkod skriv rätt hallå");
+                        Console.WriteLine("Fel pinkod");
                         Console.ReadKey();
                     }
                 }
@@ -458,6 +449,7 @@ namespace Bank
                 }
             }
         }
+        
     }
 
 }

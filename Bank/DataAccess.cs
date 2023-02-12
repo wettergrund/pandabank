@@ -97,6 +97,15 @@ namespace Bank
                 return false;
             }
         }
+        public static decimal CheckTotalBalance(int user_id)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<BankAccountModel>($"SELECT SUM(b.balance) AS balance FROM bank_account b WHERE b.user_id = '{user_id}'");
+                return output.First().balance;
+            }
+
+        }
         // Checks if the users exists in the database
         public static bool CheckUserExists(string email)
         {
@@ -246,6 +255,14 @@ namespace Bank
                 cnn.Execute($"INSERT INTO bank_account (name, user_id, currency_id, interest_rate, balance ) VALUES (@name, '{userId}',@currency_id, @interest_rate ,@balance )", Account);
             }
         }
+
+        public static void UpdateLoanAmount(BankLoanModel loan,int userID)
+        {
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
+            {
+                cnn.Query($"INSERT INTO bank_loan (name,interest_rate,user_id,amount) VALUES (@name,@interest_rate,'{userID}', @amount)", loan);
+            }
+        }
         public static void Deposit(int selectedAcc, decimal amount)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
@@ -296,7 +313,6 @@ namespace Bank
                 return output.ToList();
             }
         }
-
         public static void LoginAttempt()
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))

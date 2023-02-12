@@ -345,9 +345,21 @@ namespace Bank
                         transaction.SetTransactionName(options[selectedRow].id);
                         Console.WriteLine("-------------------------");
                         Console.Write(transaction.transaction_name + "\nSumma: ");
-                        Console.Write(transaction.GetSignedAmount(options[selectedRow].id));
+                        Console.Write(transaction.GetSignedAmount(options[selectedRow].id) + "\n");
                         Console.ResetColor();
-                        Console.WriteLine("\nFrån: " + transaction.from_account_name + "\nTill: " + transaction.to_account_name + "\nDatum: " + transaction.timestamp);
+                        if(transaction.transaction_name != "Insättning" && transaction.transaction_name != "Uttag")
+                        {
+                            Console.WriteLine("Från: " + transaction.from_account_name + "\nTill: " + transaction.to_account_name);
+                        }
+                        else if (transaction.transaction_name == "Uttag")
+                        {
+                            Console.WriteLine("Från: " + transaction.from_account_name);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Till: " + transaction.to_account_name);
+                        }
+                        Console.WriteLine("Datum: " + transaction.timestamp);
                         Console.WriteLine("-------------------------");
                     }
                     Console.ReadKey();

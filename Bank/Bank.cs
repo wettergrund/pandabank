@@ -3,11 +3,118 @@
 namespace Bank
 {
     internal class Bank
-    {
+    { //temporary placement for moving ascii art before the user logs in
+        static void ConsoleDraw(IEnumerable<string> lines, int x, int y)
+        {
+            if (x > Console.WindowWidth) return;
+            if (y > Console.WindowHeight) return;
+
+            var trimLeft = x < 0 ? -x : 0;
+            int index = y;
+
+            x = x < 0 ? 0 : x;
+            y = y < 0 ? 0 : y;
+
+            var linesToPrint =
+                from line in lines
+                let currentIndex = index++
+                where currentIndex > 0 && currentIndex < Console.WindowHeight
+                select new
+                {
+                    Text = new String(line.Skip(trimLeft).Take(Math.Min(Console.WindowWidth - x, line.Length - trimLeft)).ToArray()),
+                    X = x,
+                    Y = y++
+                };
+
+            Console.Clear();
+            foreach (var line in linesToPrint)
+            {
+                Console.SetCursorPosition(line.X, line.Y);
+                Console.Write(line.Text);
+            }
+        }
         // Shows a main menu to the user with options to login, or to exit the program
         public void ShowMenu()
         {
-            Menu MainMenu = new Menu(new string[] { "Logga in", "Stäng programmet" });
+            { //ascii art for when the user logs in
+                Console.CursorVisible = false;
+
+                var arr = new[]
+                {
+
+@"                              _,add8ba, ",
+@"                            ,d888888888b, ",
+@"                           d8888888888888b                        _,ad8ba,_ ",
+@"                          d888888888888888)                     ,d888888888b, ",
+@"                          I8888888888888888 _________          ,8888888888888b ",
+@"                __________`Y88888888888888P           baaa,__ ,888888888888888, ",
+@"            ,adP           9888888888P  ^                 ^  Y8888888888888888I ",
+@"         ,a8 ^           ,d888P 888P^        BY:                ^ Y8888888888P' ",
+@"       ,a8^            ,d8888              Jonas                  ^Y8888888P' ",
+@"      a88'           ,d8888P                Christopher              I88P ^ ",
+@"    ,d88'           d88888P                    Leo                      b, ",
+@"   ,d88'           d888888                      Zak                     b, ",
+@"  ,d88'           d888888I                        Morgan                 b,",
+@"  d88I           ,8888888             ___                                `b, ",
+@" ,888'           d8888888          ,d88888b,              ____            `b, ",
+@" d888           ,8888888I         d88888888b,           ,d8888b,           `b ",
+@",8888           I8888888I        d8888888888I          ,88888888b           8, ",
+@"I8888           88888888b       d88888888888           8888888888b          8I ",
+@"d8886           888888888       Y888888888P            Y8888888888,        ,8b ",
+@"88888b          I88888888b       Y8888888^              Y888888888I        d88, ",
+@"Y88888b          888888888b,      ^   ^                 Y8888888P'       d888I ",
+@" 888888b         88888888888b,                            Y8888P^        d88888 ",
+@" Y888888b       ,8888888888888ba,_          _______          ^        ,d888888 ",
+@" I8888888b,    ,888888888888888888ba,_     d88888888b               ,ad8888888I ",
+@" `888888888b,  I8888888888888888888888b,    ^^Y888P^^      ____.,ad88888888888I ",
+@"  88888888888b,`888888888888888888888888b,     ~~      ad888888888888888888888' ",
+@"  8888888888888698888888888888888888888888b_,ad88ba,_,d88888888888888888888888 ",
+@"  88888888888888888888888888888888888888888b,`^^^ d8888888888888888888888888I",
+@"  8888888888888888888888888888888888888888888baaad888888888888888888888888888'",
+@"  Y8888888888888888888888888888888888888888888888888888888888888888888888888P",
+@"  I888888888888888888888888888888888888888888888P^  ^Y8888888888888888888888'",
+@"   Y88888888888888888P88888888888888888888888888'     ^88888888888888888888I ",
+@"   Y8888888888888888  8888888888888888888888888       8888888888888888888P ",
+@"     Y888888888888888   888888888888888888888888,     ,888888888888888888P ",
+@"      Y88888888888888b   88888888888888888888888I     I888888888888888888 ",
+@"        Y8888888888888b   8888888888888888888888I     I88888888888888888 ",
+@"         Y88888888888P    888888888888888888888b     d8888888888888888 ",
+@"           ^^^^^^^^^^      Y88888888888888888888,    888888888888888P ",
+@"                             8888888888888888888b,   Y888888888888P^ ",
+@"                              Y888888888888888888b    Y8888888P^ ",
+@"                                Y8888888888888888P            ^ ",
+@"                                   YY88888888888P ",
+@"                                       ^^^^^^^^^^ ",
+
+            @"                                             ",
+            @"    \ \        / / | |                         ",
+            @"     \ \  /\  / /__| | ___ ___  _ __ ___   ___  ",
+            @"      \ \/  \/ / _ \ |/ __/ _ \| '_ ` _ \ / _ \ ",
+            @"       \  /\  /  __/ | (_| (_) | | | | | |  __/ ",
+            @"     ___\/__\/ \___|_|\___\___/|_| |_| |_|\___| ",
+            @"    |__   __|                                   ",
+            @"       | | ___                                  ",
+            @"       | |/ _ \                                 ",
+            @"       | | (_) |                                ",
+            @"     __|_|\___/            _        _                _ ",
+            @"     |  __ \              | |     | |               | | ",
+            @"     | |__) |_ _ _ __   __| | __ _| |__   __ _ _ __ | | _____ _ __  ",
+            @"     |  ___/ _` | '_ \ / _` |/ _` | '_ \ / _` | '_ \| |/ / _ \ '_ \ ",
+            @"     | |  | (_| | | | | (_| | (_| | |_) | (_| | | | |   <  __/ | | |",
+            @"     |_|   \__,_|_| |_|\__,_|\__,_|_.__/ \__,_|_| |_|_|\_\___|_| |_|",
+
+        };
+
+                var maxLength = arr.Aggregate(0, (max, line) => Math.Max(max, line.Length));
+                var x = Console.BufferWidth / 2 - maxLength / 2;
+                for (int y = -arr.Length; y < Console.WindowHeight + arr.Length; y++)
+                {
+                    ConsoleDraw(arr, x, y);
+                    Thread.Sleep(100);
+                }
+               };
+
+                Menu MainMenu = new Menu(new string[] { "Logga in", "Stäng programmet" });
             bool showMenu = true;
             while (showMenu)
             {

@@ -18,6 +18,6 @@ Pandabank is a bank-like application that enables users to perform various banki
 
  
 ## 👨‍💻 Team 
-<a href = "https://github.com/Tanu-N-Prabhu/Python/graphs/contributors">
+<a href = "https://github.com/wettergrund/pandabank/graphs/contributors">
   <img src = "https://contrib.rocks/image?repo=wettergrund/pandabank"/>
 </a>

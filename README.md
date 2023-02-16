@@ -14,6 +14,7 @@
 ⠀⠀⠀⠀⠀⠀⠘⠛⠻⢿⣿⣿⣿⣿⣿⠟⠛⠁⠀⠀⠀⠀⠀⠀PANDABANK⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠈⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀**
 
+![Bankgif](https://user-images.githubusercontent.com/50584818/219435642-4cb0695e-ae28-4250-a12d-989442225780.gif)
 
 
 Pandabank is a bank-like application that enables users to perform various banking operations such as account creation, deposits, withdrawals, and transfers. The application utilizes a Postgres database to store user account details and transaction records. It was developed as a school project to enhance students' proficiency in C# programming and database connectivity.
@@ -75,3 +76,16 @@ Pandabank is a bank-like application that enables users to perform various banki
 - DataAccess.cs 
   - Need clean up
 - Clean up of classes and overall structure
+
+
+---
+
+## Diagram
+
+![Copy_of_Blank_diagram](https://user-images.githubusercontent.com/50584818/219436603-60cb5b59-098b-4731-911a-6dc503e33e3b.jpeg)
+
+---
+
+## 🔗 Links
+
+<a href = "https://trello.com/b/Ov9o1JtM/agila-pandor">Trello board</a>

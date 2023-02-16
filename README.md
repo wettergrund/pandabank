@@ -1,5 +1,5 @@
 
-**⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+**⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⣿⣿⣿⣿⣿⣿⣆⠀⢀⣀⣀⣤⣤⣤⣦⣦⣤⣤⣄⣀⣀⠀⢠⣾⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠛⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -23,15 +23,16 @@ Pandabank is a bank-like application that enables users to perform various banki
   <img src = "https://contrib.rocks/image?repo=wettergrund/pandabank"/>
 </a>
 
+
 ---
 
 ## 🖥 Tech stack
-![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=c-sharp&logoColor=white)
-![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=c-sharp&logoColor=white) 
+![Postgres](https://img.shields.io/badge/PostgreSQL-316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 
 ---
 
-## Classes / objects
+## ⚙ Classes / objects
 |Object     |Description    |Comment|
 |-----|--------|-------|
 |Login |Handle input from user and validate credentials    |
@@ -42,8 +43,10 @@ Pandabank is a bank-like application that enables users to perform various banki
 |Loan |Let the user to take a loan 5x total user balance | Stored in DB, but not added to account balance
 |DataAccess  |Set of methods that receive / update data from database|
 |Helper |Set of methods used throughout application     |
+|Bank |Fundamental functions for bank to work     |
 
-### Models
+
+### 📄 Models
 |Object     |Description    |
 |-----|--------|
 |Person |Store data of current user     |
@@ -56,7 +59,7 @@ Pandabank is a bank-like application that enables users to perform various banki
 
 ## 🔑 Key features
 |Feature     |Status    |
-|-----|--------|
+|-----|:--------:|
 |Transfer money own accounts |✅     |
 |Transfer money to others | ✅    |
 |Different roles (client, admin) |✅     |
@@ -67,6 +70,8 @@ Pandabank is a bank-like application that enables users to perform various banki
 
 ## 🏗 To be improved
 
-- Bank loan, no money sent to user
-- Data Access, need clean up
+- Bank loan 
+  - No money sent to user
+- DataAccess.cs 
+  - Need clean up
 - Clean up of classes and overall structure

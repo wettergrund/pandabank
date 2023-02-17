@@ -92,6 +92,11 @@ Pandabank is a bank-like application that enables users to perform various banki
 
 ![Copy_of_Blank_diagram](https://user-images.githubusercontent.com/50584818/219436603-60cb5b59-098b-4731-911a-6dc503e33e3b.jpeg)
 
+### Class diagram
+
+![ClassDiagram](https://user-images.githubusercontent.com/50584818/219635371-2b45096f-a13e-4147-847f-cf96fd7dc410.png)
+
+
 ---
 
 ## 🔗 Links

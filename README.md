@@ -20,10 +20,17 @@
 Pandabank is a bank-like application that enables users to perform various banking operations such as account creation, deposits, withdrawals, and transfers. The application utilizes a Postgres database to store user account details and transaction records. It was developed as a school project to enhance students' proficiency in C# programming and database connectivity.
 
 ## 👨‍💻 Team 
+
+
+- Leo
+- Zak
+- Jonas
+- Morgan
+- Christopher
+
 <a href = "https://github.com/wettergrund/pandabank/graphs/contributors">
   <img src = "https://contrib.rocks/image?repo=wettergrund/pandabank"/>
 </a>
-
 
 ---
 

@@ -17,7 +17,7 @@
 ![Bankgif](https://user-images.githubusercontent.com/50584818/219435642-4cb0695e-ae28-4250-a12d-989442225780.gif)
 
 
-Pandabank is a bank-like application that enables users to perform various banking operations such as account creation, deposits, withdrawals, and transfers. The application utilizes a Postgres database to store user account details and transaction records. It was developed as a school project to enhance students' proficiency in C# programming and database connectivity.
+Pandabank is a bank-like application that enables users to perform various banking operations such as account creation, deposits and transfers. The application utilizes a Postgres database to store user account details and transaction records. It was developed as a school project to enhance students' proficiency in C# programming and database connectivity.
 
 ## 👨‍💻 Team 
 

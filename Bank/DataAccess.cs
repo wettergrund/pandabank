@@ -1,19 +1,11 @@
 ﻿using Dapper;
 using Npgsql;
-using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
-using System.Data.SqlTypes;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bank
 {
-    public class DataAccess
+    public static class DataAccess
     {
         // Gets account data for the given user_id
         public static List<BankAccountModel> GetAccountData(int user_id)
@@ -51,7 +43,7 @@ namespace Bank
         }
         public static List<BankUserModel> GetUserData(int user_id)
         {
-            using(IDbConnection cnn =new NpgsqlConnection(LoadConnectionString()))
+            using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 var output = cnn.Query<BankUserModel>($"SELECT first_name, last_name, email, pin_code, role_id , branch_id FROM bank_user WHERE id = '{user_id}'", new DynamicParameters());
                 return output.ToList();
@@ -109,14 +101,14 @@ namespace Bank
         // Checks if the users exists in the database
         public static bool CheckUserExists(string email)
         {
-            using (NpgsqlConnection cnn = new NpgsqlConnection(LoadConnectionString())) 
+            using (NpgsqlConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
                 cnn.Open();
                 var sql = $"SELECT COUNT(*) FROM bank_user WHERE email = '{email}'";
                 var cmd = new NpgsqlCommand(sql, cnn);
                 cmd.Parameters.AddWithValue("email", email);
                 bool userExists = (long)cmd.ExecuteScalar() > 0;
-                if(userExists)
+                if (userExists)
                 {
                     cnn.Close();
                     return true;
@@ -192,10 +184,10 @@ namespace Bank
                     var output = cnn.Query<BankAccountModel>($"Select id FROM bank_account WHERE user_id = '{userID}' AND EXISTS (SELECT id FROM bank_account) ORDER BY id ASC", new DynamicParameters());
                     return output.ElementAt(0).id;
                 }
-                catch(NpgsqlException)
+                catch (NpgsqlException)
                 {
                     return -1; // If user doesn't have any accounts, returns -1
-                }               
+                }
             }
         }
         public static void TransferToUser(BankTransactionModel transaction, string transferName)
@@ -220,7 +212,7 @@ namespace Bank
                         JOIN bank_user u ON u.id = b.user_id
                         JOIN bank_user r ON r.id = c.user_id
                     ORDER BY t.timestamp DESC", transaction);
-                    Console.Clear();
+                Console.Clear();
                 foreach (KeyValuePair<string, object> kvp in transactionOutput.ElementAt(0))
                 {
                     Console.WriteLine(Helper.FormatString(kvp.Key.Replace('_', ' ')) + ": " + kvp.Value);
@@ -256,7 +248,7 @@ namespace Bank
             }
         }
 
-        public static void UpdateLoanAmount(BankLoanModel loan,int userID)
+        public static void UpdateLoanAmount(BankLoanModel loan, int userID)
         {
             using (IDbConnection cnn = new NpgsqlConnection(LoadConnectionString()))
             {
@@ -369,7 +361,7 @@ namespace Bank
         {
             try
             {
-                using (IDbConnection cnn = new NpgsqlConnection(ConfigurationManager.ConnectionStrings[id].ConnectionString)) 
+                using (IDbConnection cnn = new NpgsqlConnection(ConfigurationManager.ConnectionStrings[id].ConnectionString))
                 {
                     cnn.Open();
                     cnn.Close();
@@ -380,11 +372,11 @@ namespace Bank
             {
                 return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
             }
-            catch(System.Net.Sockets.SocketException)
+            catch (System.Net.Sockets.SocketException)
             {
                 return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
             }
-            catch(System.NullReferenceException)
+            catch (System.NullReferenceException)
             {
                 return ConfigurationManager.ConnectionStrings["Local"].ConnectionString;
             }

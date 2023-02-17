@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace Bank
 {
-    public class UserTransfers
+    public class BankTransfers
     {
         readonly static Menu TransferMenu = new Menu(new string[] { "Välj konto:", "Till:", "Summa:", "Överför", "Gå tillbaka" });
         BankTransactionModel transaction = new BankTransactionModel();
@@ -126,7 +121,7 @@ namespace Bank
             else
             {
                 int transferID = DataAccess.GetUserID(toEmail);
-                if(transferID > 0)
+                if (transferID > 0)
                 {
                     transaction.to_account_id = DataAccess.GetAccountID(transferID);
                 }
@@ -197,7 +192,7 @@ namespace Bank
                 isValid = ValidatePincode(pin);
             }
             // If pincode is valid and user hasnt exceeded 3 attempts
-            if(isValid && DataAccess.CheckUserInfo(Person.Email, Person.PinCode)) // If pin is correct for the currently logged in user
+            if (isValid && DataAccess.CheckUserInfo(Person.Email, Person.PinCode)) // If pin is correct for the currently logged in user
             {
                 return true;
             }

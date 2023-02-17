@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Bank
+﻿namespace Bank
 {
     public static class Helper
     {
@@ -44,8 +38,8 @@ namespace Bank
             while (keyInput.Key != ConsoleKey.Enter); // Exits the loop when Enter is pressed
             return pin;
         }
-
-        public static bool CheckChange(string input) 
+        // When called checks the given input so that it contains at most TWO decimals
+        public static bool CheckChange(string input)
         {
             var inputSplit = input.Split(".");
             if (inputSplit.Length > 1 && inputSplit[1].Length > 2)
@@ -54,7 +48,7 @@ namespace Bank
             }
             return true;
         }
-
+        // When called allows the user to select between account types and different interest rates
         public static double AccountType()
         {
             Menu AccountTypeMenu = new Menu(new string[] { "Personkonto - 0% Ränta", "Sparkonto - 1.25% Ränta", "Pensionsfond - 4% Ränta" });
@@ -71,7 +65,7 @@ namespace Bank
                     return 0;
             }
         }
-
+        // When called allows the user to select which currency type to use for the account
         public static int CurrencyType()
         {
             Menu CurrencyTypeMenu = new Menu(new string[] { "SEK", "USD" });
@@ -85,15 +79,6 @@ namespace Bank
                 default:
                     return 1;
             }
-        }
-
-        public static void ResetUserData()
-        {
-            Person.id = -1;
-            Person.Email = string.Empty;
-            Person.PinCode = string.Empty;
-            Person.FirstName = string.Empty;
-            Person.LastName = string.Empty;
         }
     }
 }

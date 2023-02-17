@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Text;
-using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
-
-namespace Bank
+﻿namespace Bank
 {
     // A class that handles the creation of menus and allows the user to interact with them
     internal class Menu
@@ -97,7 +85,7 @@ namespace Bank
         // Moves the cursor to the bottom of current menu
         public void MoveCursorBottom()
         {
-            Console.SetCursorPosition(0,menuItems.Length);
+            Console.SetCursorPosition(0, menuItems.Length);
         }
         // Moves the cursor to the top of the current menu
         public void MoveCursorTop()
@@ -110,7 +98,7 @@ namespace Bank
         {
             Console.Clear();
             // Prints out the menu items in the console, and puts brackets around the selected item.
-            if (!String.IsNullOrWhiteSpace(output) )
+            if (!String.IsNullOrWhiteSpace(output))
             {
                 Console.ForegroundColor = color;
                 Console.WriteLine(output);
@@ -128,7 +116,7 @@ namespace Bank
                 else
                 {
                     Console.ResetColor();
-                    Console.WriteLine("{0} {1}",item, menuItems[i]);
+                    Console.WriteLine("{0} {1}", item, menuItems[i]);
                 }
                 Console.ResetColor();
             }
@@ -176,12 +164,11 @@ namespace Bank
             MenuItems = accountMenuItems;
             return currentUser;
         }
-
         public int CreateLockedMenu()
         {
             // Gets the account data into a list for the currently logged on user
             List<BankUserModel> currentUser = DataAccess.GetLockedUsers();
-            if(currentUser.Count == 0)
+            if (currentUser.Count == 0)
             {
                 return -1;
             }

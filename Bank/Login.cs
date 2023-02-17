@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace Bank
 {
+    // Handles the Login system and user lockouts
     public class Login
     {
         readonly static Menu LoginMenu = new Menu(new string[] { "Email:", "Pinkod:", "Gå tillbaka" });
@@ -46,7 +41,7 @@ namespace Bank
         // Prompts the user to enter their pincode and checks if its valid
         private static bool GetUserPincode()
         {
-            
+
             bool pinCheck = true;
             while (pinCheck)
             {
@@ -61,7 +56,7 @@ namespace Bank
             //If they are correct, gets the ID and allows the user to log in
             if (string.IsNullOrWhiteSpace(Person.Email) || !DataAccess.CheckUserInfo(Person.Email, Person.PinCode))
             {
-                
+
                 if (!pinCheck)
                 {
                     DataAccess.LoginAttempt();
@@ -81,9 +76,10 @@ namespace Bank
             }
             else
             {
-                if(LockedAccount())
+                if (LockedAccount())
                 {
                     Person.id = DataAccess.GetUserID(Person.Email, Person.PinCode);
+                    DataAccess.LoginReset(); // Resets users login attempts, since they successfully logged in
                     return false;
                 }
                 else
@@ -96,7 +92,7 @@ namespace Bank
             }
             return true;
         }
-
+        //Checks if account is locked
         private static bool LockedAccount()
         {
             bool isLocked = DataAccess.IsLocked();
@@ -117,7 +113,7 @@ namespace Bank
             LoginMenu.SelectIndex = 0;
             LoginMenu.PrintMenu();
         }
-
+        // Resets text on a given row
         private static void ResetRow(string row)
         {
             LoginMenu.SetMenuItem(row, LoginMenu.SelectIndex);
@@ -128,8 +124,6 @@ namespace Bank
         //Resets the menu output and moves the cursor back
         private static void Warning(string menuItem, string errorMessage)
         {
- 
-
             LoginMenu.MoveCursorBottom();
             Console.WriteLine(errorMessage);
             LoginMenu.SetMenuItem(menuItem, LoginMenu.SelectIndex);

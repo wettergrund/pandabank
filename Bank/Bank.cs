@@ -3,118 +3,12 @@
 namespace Bank
 {
     internal class Bank
-    { //temporary placement for moving ascii art before the user logs in
-        static void ConsoleDraw(IEnumerable<string> lines, int x, int y)
-        {
-            if (x > Console.WindowWidth) return;
-            if (y > Console.WindowHeight) return;
-
-            var trimLeft = x < 0 ? -x : 0;
-            int index = y;
-
-            x = x < 0 ? 0 : x;
-            y = y < 0 ? 0 : y;
-
-            var linesToPrint =
-                from line in lines
-                let currentIndex = index++
-                where currentIndex > 0 && currentIndex < Console.WindowHeight
-                select new
-                {
-                    Text = new String(line.Skip(trimLeft).Take(Math.Min(Console.WindowWidth - x, line.Length - trimLeft)).ToArray()),
-                    X = x,
-                    Y = y++
-                };
-
-            Console.Clear();
-            foreach (var line in linesToPrint)
-            {
-                Console.SetCursorPosition(line.X, line.Y);
-                Console.Write(line.Text);
-            }
-        }
+    {
+        //temporary placement for moving ascii art before the user logs in
         // Shows a main menu to the user with options to login, or to exit the program
         public void ShowMenu()
         {
-            { //ascii art for when the user logs in
-                Console.CursorVisible = false;
-
-                var arr = new[]
-                {
-
-@"                              _,add8ba, ",
-@"                            ,d888888888b, ",
-@"                           d8888888888888b                        _,ad8ba,_ ",
-@"                          d888888888888888)                     ,d888888888b, ",
-@"                          I8888888888888888 _________          ,8888888888888b ",
-@"                __________`Y88888888888888P           baaa,__ ,888888888888888, ",
-@"            ,adP           9888888888P  ^                 ^  Y8888888888888888I ",
-@"         ,a8 ^           ,d888P 888P^        BY:                ^ Y8888888888P' ",
-@"       ,a8^            ,d8888              Jonas                  ^Y8888888P' ",
-@"      a88'           ,d8888P                Christopher              I88P ^ ",
-@"    ,d88'           d88888P                    Leo                      b, ",
-@"   ,d88'           d888888                      Zak                     b, ",
-@"  ,d88'           d888888I                        Morgan                 b,",
-@"  d88I           ,8888888             ___                                `b, ",
-@" ,888'           d8888888          ,d88888b,              ____            `b, ",
-@" d888           ,8888888I         d88888888b,           ,d8888b,           `b ",
-@",8888           I8888888I        d8888888888I          ,88888888b           8, ",
-@"I8888           88888888b       d88888888888           8888888888b          8I ",
-@"d8886           888888888       Y888888888P            Y8888888888,        ,8b ",
-@"88888b          I88888888b       Y8888888^              Y888888888I        d88, ",
-@"Y88888b          888888888b,      ^   ^                 Y8888888P'       d888I ",
-@" 888888b         88888888888b,                            Y8888P^        d88888 ",
-@" Y888888b       ,8888888888888ba,_          _______          ^        ,d888888 ",
-@" I8888888b,    ,888888888888888888ba,_     d88888888b               ,ad8888888I ",
-@" `888888888b,  I8888888888888888888888b,    ^^Y888P^^      ____.,ad88888888888I ",
-@"  88888888888b,`888888888888888888888888b,     ~~      ad888888888888888888888' ",
-@"  8888888888888698888888888888888888888888b_,ad88ba,_,d88888888888888888888888 ",
-@"  88888888888888888888888888888888888888888b,`^^^ d8888888888888888888888888I",
-@"  8888888888888888888888888888888888888888888baaad888888888888888888888888888'",
-@"  Y8888888888888888888888888888888888888888888888888888888888888888888888888P",
-@"  I888888888888888888888888888888888888888888888P^  ^Y8888888888888888888888'",
-@"   Y88888888888888888P88888888888888888888888888'     ^88888888888888888888I ",
-@"   Y8888888888888888  8888888888888888888888888       8888888888888888888P ",
-@"     Y888888888888888   888888888888888888888888,     ,888888888888888888P ",
-@"      Y88888888888888b   88888888888888888888888I     I888888888888888888 ",
-@"        Y8888888888888b   8888888888888888888888I     I88888888888888888 ",
-@"         Y88888888888P    888888888888888888888b     d8888888888888888 ",
-@"           ^^^^^^^^^^      Y88888888888888888888,    888888888888888P ",
-@"                             8888888888888888888b,   Y888888888888P^ ",
-@"                              Y888888888888888888b    Y8888888P^ ",
-@"                                Y8888888888888888P            ^ ",
-@"                                   YY88888888888P ",
-@"                                       ^^^^^^^^^^ ",
-
-            @"                                             ",
-            @"    \ \        / / | |                         ",
-            @"     \ \  /\  / /__| | ___ ___  _ __ ___   ___  ",
-            @"      \ \/  \/ / _ \ |/ __/ _ \| '_ ` _ \ / _ \ ",
-            @"       \  /\  /  __/ | (_| (_) | | | | | |  __/ ",
-            @"     ___\/__\/ \___|_|\___\___/|_| |_| |_|\___| ",
-            @"    |__   __|                                   ",
-            @"       | | ___                                  ",
-            @"       | |/ _ \                                 ",
-            @"       | | (_) |                                ",
-            @"     __|_|\___/            _        _                _ ",
-            @"     |  __ \              | |     | |               | | ",
-            @"     | |__) |_ _ _ __   __| | __ _| |__   __ _ _ __ | | _____ _ __  ",
-            @"     |  ___/ _` | '_ \ / _` |/ _` | '_ \ / _` | '_ \| |/ / _ \ '_ \ ",
-            @"     | |  | (_| | | | | (_| | (_| | |_) | (_| | | | |   <  __/ | | |",
-            @"     |_|   \__,_|_| |_|\__,_|\__,_|_.__/ \__,_|_| |_|_|\_\___|_| |_|",
-
-        };
-
-                var maxLength = arr.Aggregate(0, (max, line) => Math.Max(max, line.Length));
-                var x = Console.BufferWidth / 2 - maxLength / 2;
-                for (int y = -arr.Length; y < Console.WindowHeight + arr.Length; y++)
-                {
-                    ConsoleDraw(arr, x, y);
-                    Thread.Sleep(100);
-                }
-               };
-
-                Menu MainMenu = new Menu(new string[] { "Logga in", "Stäng programmet" });
+            Menu MainMenu = new Menu(new string[] { "Logga in", "Stäng programmet" });
             bool showMenu = true;
             while (showMenu)
             {
@@ -137,7 +31,7 @@ namespace Bank
         // Checking balance to their accounts, transfers between their own accounts and logging out.
         private void ShowUserMenu()
         {
-            Menu UserMenu = new Menu(new string[] { "Konton", "Betala och Överföra", "Utgiftskollen", "Lån", "Logga ut" });           
+            Menu UserMenu = new Menu(new string[] { "Konton", "Betala och Överföra", "Utgiftskollen", "Lån", "Logga ut" });
             // Menu for admin user
             bool isAdmin = DataAccess.AdminAccess();
             if (isAdmin)
@@ -148,7 +42,7 @@ namespace Bank
             while (showMenu)
             {
                 int index = UserMenu.UseMenu();
-                if(UserMenu.GetMenuItem() == "Logga ut") 
+                if (UserMenu.GetMenuItem() == "Logga ut")
                 {
                     break;
                 }
@@ -160,7 +54,8 @@ namespace Bank
         }
 
         private void MenuOptions(int index)
-        {   Loan Loan = new Loan();
+        {
+            Loan Loan = new Loan();
             Menu OptionsMenu = new Menu();
             bool showMenu = true;
             while (showMenu)
@@ -179,7 +74,7 @@ namespace Bank
                         showMenu = TransactionLog();
                         break;
                     case 3:
-                       showMenu = Loan.loanIntrestRate();
+                        showMenu = Loan.loanIntrestRate();
                         break;
                     case 4:
                         showMenu = false;
@@ -193,7 +88,7 @@ namespace Bank
 
         private bool AccountOptions(int index)
         {
-            switch(index)
+            switch (index)
             {
                 case 0:
                     ShowAccountBalance();
@@ -214,7 +109,7 @@ namespace Bank
         //case(Transfer(), Deposit(), Withdraw())
         private bool TransactionOptions(int index)
         {
-            UserTransfers BankTransactions = new UserTransfers();
+            BankTransfers BankTransactions = new BankTransfers();
             switch (index)
             {
                 case 0:
@@ -347,7 +242,7 @@ namespace Bank
                 {
                     newAccount.interest_rate = Helper.AccountType();
                     newAccount.currency_id = Helper.CurrencyType();
-                    if(newAccount.currency_id == 2)
+                    if (newAccount.currency_id == 2)
                     {
                         currencyName = "USD";
                     }
@@ -447,14 +342,14 @@ namespace Bank
                 else
                 {
                     List<BankTransactionModel> transactions = DataAccess.GetTransactions(options[selectedRow].id);
-                    foreach(var transaction in transactions)
+                    foreach (var transaction in transactions)
                     {
                         transaction.SetTransactionName(options[selectedRow].id);
                         Console.WriteLine("-------------------------");
                         Console.Write(transaction.transaction_name + "\nSumma: ");
                         Console.Write(transaction.GetSignedAmount(options[selectedRow].id) + "\n");
                         Console.ResetColor();
-                        if(transaction.transaction_name != "Insättning" && transaction.transaction_name != "Uttag")
+                        if (transaction.transaction_name != "Insättning" && transaction.transaction_name != "Uttag")
                         {
                             Console.WriteLine("Från: " + transaction.from_account_name + "\nTill: " + transaction.to_account_name);
                         }
@@ -483,12 +378,12 @@ namespace Bank
 
             DepositMenu.Output = "Välj konto.";
             selectedAccount = DepositMenu.UseMenu();
-            if(selectedAccount != DepositMenu.MenuItems.Length -1) 
+            if (selectedAccount != DepositMenu.MenuItems.Length - 1)
             {
                 Console.WriteLine("Ange hur mycket du vill du vill sätta in.");
-                string amount = Console.ReadLine().Replace(",",".");
+                string amount = Console.ReadLine().Replace(",", ".");
                 bool success = decimal.TryParse(amount, out decimal userInput);
-                if(success && Helper.CheckChange(amount))
+                if (success && Helper.CheckChange(amount))
                 {
                     if (userInput > 0)
                     {
@@ -509,7 +404,7 @@ namespace Bank
                     Console.ReadKey();
                 }
             }
-            
+
         }
         public void Withdraw()
         {
@@ -518,7 +413,7 @@ namespace Bank
             List<BankAccountModel> accounts = WithdrawMenu.CreateTransferMenu();
             WithdrawMenu.Output = "Välj Konto";
             int selectedAccount = WithdrawMenu.UseMenu();
-            if(selectedAccount != WithdrawMenu.MenuItems.Length -1)
+            if (selectedAccount != WithdrawMenu.MenuItems.Length - 1)
             {
                 Menu withdrawAmount = new Menu(new string[] { "100:-", "200:-", "500:-", "1000:-", "Ange egen summa." });
                 switch (withdrawAmount.UseMenu())
@@ -539,7 +434,7 @@ namespace Bank
                         Console.WriteLine("Ange hur mycket du vill du vill dra ut.");
                         string amount = Console.ReadLine().Replace(",", ".");
                         bool success = decimal.TryParse(amount, out decimal userInput);
-                        if(success && Helper.CheckChange(amount))
+                        if (success && Helper.CheckChange(amount))
                         {
                             if (userInput > 0)
                             {
@@ -568,9 +463,116 @@ namespace Bank
                 }
             }
         }
-        
-    }
+        static void ConsoleDraw(IEnumerable<string> lines, int x, int y)
+        {
+            if (x > Console.WindowWidth) return;
+            if (y > Console.WindowHeight) return;
 
+            var trimLeft = x < 0 ? -x : 0;
+            int index = y;
+
+            x = x < 0 ? 0 : x;
+            y = y < 0 ? 0 : y;
+
+            var linesToPrint =
+                from line in lines
+                let currentIndex = index++
+                where currentIndex > 0 && currentIndex < Console.WindowHeight
+                select new
+                {
+                    Text = new String(line.Skip(trimLeft).Take(Math.Min(Console.WindowWidth - x, line.Length - trimLeft)).ToArray()),
+                    X = x,
+                    Y = y++
+                };
+
+            Console.Clear();
+            foreach (var line in linesToPrint)
+            {
+                Console.SetCursorPosition(line.X, line.Y);
+                Console.Write(line.Text);
+            }
+        }
+        public static void LoginArt()
+        {
+            { //ascii art for when the user logs in
+                Console.CursorVisible = false;
+
+                var arr = new[]
+                {
+
+@"                              _,add8ba, ",
+@"                            ,d888888888b, ",
+@"                           d8888888888888b                        _,ad8ba,_ ",
+@"                          d888888888888888)                     ,d888888888b, ",
+@"                          I8888888888888888 _________          ,8888888888888b ",
+@"                __________`Y88888888888888P           baaa,__ ,888888888888888, ",
+@"            ,adP           9888888888P  ^                 ^  Y8888888888888888I ",
+@"         ,a8 ^           ,d888P 888P^        BY:                ^ Y8888888888P' ",
+@"       ,a8^            ,d8888              Jonas                  ^Y8888888P' ",
+@"      a88'           ,d8888P                Christopher              I88P ^ ",
+@"    ,d88'           d88888P                    Leo                      b, ",
+@"   ,d88'           d888888                      Zak                     b, ",
+@"  ,d88'           d888888I                        Morgan                 b,",
+@"  d88I           ,8888888             ___                                `b, ",
+@" ,888'           d8888888          ,d88888b,              ____            `b, ",
+@" d888           ,8888888I         d88888888b,           ,d8888b,           `b ",
+@",8888           I8888888I        d8888888888I          ,88888888b           8, ",
+@"I8888           88888888b       d88888888888           8888888888b          8I ",
+@"d8886           888888888       Y888888888P            Y8888888888,        ,8b ",
+@"88888b          I88888888b       Y8888888^              Y888888888I        d88, ",
+@"Y88888b          888888888b,      ^   ^                 Y8888888P'       d888I ",
+@" 888888b         88888888888b,                            Y8888P^        d88888 ",
+@" Y888888b       ,8888888888888ba,_          _______          ^        ,d888888 ",
+@" I8888888b,    ,888888888888888888ba,_     d88888888b               ,ad8888888I ",
+@" `888888888b,  I8888888888888888888888b,    ^^Y888P^^      ____.,ad88888888888I ",
+@"  88888888888b,`888888888888888888888888b,     ~~      ad888888888888888888888' ",
+@"  8888888888888698888888888888888888888888b_,ad88ba,_,d88888888888888888888888 ",
+@"  88888888888888888888888888888888888888888b,`^^^ d8888888888888888888888888I",
+@"  8888888888888888888888888888888888888888888baaad888888888888888888888888888'",
+@"  Y8888888888888888888888888888888888888888888888888888888888888888888888888P",
+@"  I888888888888888888888888888888888888888888888P^  ^Y8888888888888888888888'",
+@"   Y88888888888888888P88888888888888888888888888'     ^88888888888888888888I ",
+@"   Y8888888888888888  8888888888888888888888888       8888888888888888888P ",
+@"     Y888888888888888   888888888888888888888888,     ,888888888888888888P ",
+@"      Y88888888888888b   88888888888888888888888I     I888888888888888888 ",
+@"        Y8888888888888b   8888888888888888888888I     I88888888888888888 ",
+@"         Y88888888888P    888888888888888888888b     d8888888888888888 ",
+@"           ^^^^^^^^^^      Y88888888888888888888,    888888888888888P ",
+@"                             8888888888888888888b,   Y888888888888P^ ",
+@"                              Y888888888888888888b    Y8888888P^ ",
+@"                                Y8888888888888888P            ^ ",
+@"                                   YY88888888888P ",
+@"                                       ^^^^^^^^^^ ",
+
+            @"                                             ",
+            @"    \ \        / / | |                         ",
+            @"     \ \  /\  / /__| | ___ ___  _ __ ___   ___  ",
+            @"      \ \/  \/ / _ \ |/ __/ _ \| '_ ` _ \ / _ \ ",
+            @"       \  /\  /  __/ | (_| (_) | | | | | |  __/ ",
+            @"     ___\/__\/ \___|_|\___\___/|_| |_| |_|\___| ",
+            @"    |__   __|                                   ",
+            @"       | | ___                                  ",
+            @"       | |/ _ \                                 ",
+            @"       | | (_) |                                ",
+            @"     __|_|\___/            _        _                _ ",
+            @"     |  __ \              | |     | |               | | ",
+            @"     | |__) |_ _ _ __   __| | __ _| |__   __ _ _ __ | | _____ _ __  ",
+            @"     |  ___/ _` | '_ \ / _` |/ _` | '_ \ / _` | '_ \| |/ / _ \ '_ \ ",
+            @"     | |  | (_| | | | | (_| | (_| | |_) | (_| | | | |   <  __/ | | |",
+            @"     |_|   \__,_|_| |_|\__,_|\__,_|_.__/ \__,_|_| |_|_|\_\___|_| |_|",
+
+        };
+
+                var maxLength = arr.Aggregate(0, (max, line) => Math.Max(max, line.Length));
+                var x = Console.BufferWidth / 2 - maxLength / 2;
+                for (int y = -arr.Length; y < Console.WindowHeight + arr.Length; y++)
+                {
+                    ConsoleDraw(arr, x, y);
+                    Thread.Sleep(100);
+                }
+            };
+        }
+    }
 }
 
 

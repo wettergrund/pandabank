@@ -90,8 +90,12 @@ Pandabank is a bank-like application that enables users to perform various banki
 
 ## Diagram
 
-![Copy_of_Blank_diagram](https://user-images.githubusercontent.com/50584818/219436603-60cb5b59-098b-4731-911a-6dc503e33e3b.jpeg)
+<a href = "https://github.com/wettergrund/pandabank/files/10767594/C4_Bank_Panda.pdf">
+  <img src = "https://user-images.githubusercontent.com/50584818/219679100-42a59bd3-bc15-42b6-ae42-70d487a1f949.png"/>
+</a>
 
+  _Click on image to download full C4 diagram_
+  
 ---
 
 ## 🔗 Links

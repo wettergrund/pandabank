@@ -69,14 +69,15 @@ Pandabank is a bank-like application that enables users to perform various banki
 
 ---
 
-## 🏗 To be improved
+## 🏗 To be improved / known bugs
 
 - Bank loan 
-  - No money sent to user
+  - Money not added to account balance
 - DataAccess.cs 
   - Need clean up
 - Clean up of classes and overall structure
-
+- Currency exchange
+  - Working method for currency convertion, but not visible to the user
 
 ---
 

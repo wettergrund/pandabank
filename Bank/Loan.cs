@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Bank
+﻿namespace Bank
 {
     public class Loan
     {
@@ -53,7 +47,10 @@ namespace Bank
                     }
                     else
                     {
-                        Console.WriteLine("Du har för lite pengar för att låna mängden pengar");
+                        Console.WriteLine("Du har för lite pengar för ta detta lån");
+                        Console.ReadKey();
+                        loanAmount = 0;
+                        break;
                     }
                     break;
                 case 4:
@@ -75,7 +72,7 @@ namespace Bank
                         if (pincode == pincheck.First().pin_code)
                         {
                             DataAccess.UpdateLoanAmount(newLoan, Person.id);
-                            Console.WriteLine("\nLån godkänt. Pengarna sätts in inom 5 arbets dagar.");
+                            Console.WriteLine("\nLån godkänt. Pengarna sätts in inom 5 arbets dagar. Vi LOVAR!");
                             Console.ReadKey();
                             return false;
                         }
@@ -89,7 +86,7 @@ namespace Bank
                         break;
                 }
             }
-                return true;
+            return true;
         }
     }
 }

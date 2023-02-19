@@ -22,11 +22,11 @@ Pandabank is a bank-like application that enables users to perform various banki
 ## 👨‍💻 Team 
 
 
-- Leo
-- Zak
-- Jonas
-- Morgan
-- Christopher
+- ![Leo Stålenhag](https://github.com/L-stal)
+- ![Zak Troy](https://github.com/Taragoul)
+- ![Jonas Wettergrund](https://github.com/wettergrund)
+- ![Morgan Lindzen](https://github.com/Toxicwhisper)
+- ![Christopher Vasankari](https://github.com/Chrisvasa)
 
 <a href = "https://github.com/wettergrund/pandabank/graphs/contributors">
   <img src = "https://contrib.rocks/image?repo=wettergrund/pandabank"/>
@@ -72,7 +72,7 @@ Pandabank is a bank-like application that enables users to perform various banki
 |Transfer money to others | ✅    |
 |Different roles (client, admin) |✅     |
 |Transaction history |✅     |
-|Currency exchange |Method created but currency no yet visible to user     |
+|Currency exchange |Method created but currency not yet visible to user     |
 
 ---
 
@@ -84,7 +84,7 @@ Pandabank is a bank-like application that enables users to perform various banki
   - Need clean up
 - Clean up of classes and overall structure
 - Currency exchange
-  - Working method for currency convertion, but not visible to the user
+  - Working method for currency conversion, but not visible to the user
 
 ---
 
